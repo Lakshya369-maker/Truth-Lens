@@ -1,6 +1,6 @@
 const apiKey = "6cf1b91669b34cfa90a089173bc32bef";
 const backendURL = "http://192.168.137.248:5000/predict";
-const AUTH_API_URL = "http://localhost:5000/api";
+const AUTH_API_URL = "https://truth-lens-fvxm.onrender.com";
 let latestNewsTitles = [];
 window.lockFlip = false;
 
