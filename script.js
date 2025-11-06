@@ -565,14 +565,6 @@ async function handleSignIn(event) {
     alert('⚠️ Please enter username and password');
     return;
   }
-  if (response.status === 401) {
-  alert('❌ You are not registered!\n\nPlease sign up.');
-  document.getElementById('signin-form').reset();
-  setTimeout(() => {
-    flipTo('signup');  // Redirects to sign-up page
-  }, 1000);
-  return;
-}
 
   try {
     const response = await fetch(`${AUTH_API_URL}/signin`, {
@@ -582,6 +574,15 @@ async function handleSignIn(event) {
     });
 
     console.log('📥 SignIn Response status:', response.status);
+
+    if (response.status === 401) {
+      alert('❌ You are not registered!\n\nPlease sign up.');
+      document.getElementById('signin-form').reset();
+      setTimeout(() => {
+        flipTo('signup');  // Redirects to sign-up page
+      }, 1000);
+      return;
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -596,7 +597,7 @@ async function handleSignIn(event) {
     if (data.success) {
       localStorage.setItem('signedInUser', data.username);
       localStorage.setItem('signInTime', Date.now().toString());
-      
+
       simulateSignIn(data.username);
       document.getElementById('signin-form').reset();
       flipBack();
@@ -609,6 +610,7 @@ async function handleSignIn(event) {
     alert('❌ Error connecting to server: ' + error.message);
   }
 }
+
 
 function onUserSignedIn(username) {
   const signInBtn = document.getElementById("signin-btn");
