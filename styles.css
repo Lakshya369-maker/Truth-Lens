@@ -2029,3 +2029,19 @@ textarea.fake-glow {
 .flip-container.flipped-contact #contact-section { 
   transform: rotateY(0deg); 
 }
+
+@media (max-width: 1024px) {
+  /* Hide all content, show block message */
+  body::before {
+    content: "⚠️ Desktop only...";
+    /* Shows on tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Extra protection for mobile */
+  body::before {
+    content: "📱 Use computer to access...";
+    /* Shows on phones */
+  }
+}

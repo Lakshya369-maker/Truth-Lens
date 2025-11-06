@@ -565,6 +565,14 @@ async function handleSignIn(event) {
     alert('⚠️ Please enter username and password');
     return;
   }
+  if (response.status === 401) {
+  alert('❌ You are not registered!\n\nPlease sign up.');
+  document.getElementById('signin-form').reset();
+  setTimeout(() => {
+    flipTo('signup');  // Redirects to sign-up page
+  }, 1000);
+  return;
+}
 
   try {
     const response = await fetch(`${AUTH_API_URL}/signin`, {
