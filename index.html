@@ -66,9 +66,9 @@
     <a href="#" class="sidebar-link" onclick="flipTo('resources')"><span class="star-wrap"><span class="red-star">*</span>Educational Resources</span></a>
     <a href="#" class="sidebar-link" onclick="flipTo('community')"><span class="star-wrap"><span class="red-star">*</span>Community Forums</span></a>
     <a href="#" class="sidebar-link" onclick="flipTo('report')"><span class="star-wrap"><span class="red-star">*</span>Report Fake News</span></a>
-    <a href="#" class="sidebar-link"><span class="star-wrap"><span class="red-star">*</span>FAQs</span></a>
-    <a href="#" class="sidebar-link"><span class="star-wrap"><span class="red-star">*</span>Privacy Policy</span></a>
-    <a href="#" class="sidebar-link"><span class="star-wrap"><span class="red-star">*</span>Contact</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('faqs')"><span class="star-wrap"><span class="red-star">*</span>FAQs</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('privacy')"><span class="star-wrap"><span class="red-star">*</span>Privacy Policy</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('contact')"><span class="star-wrap"><span class="red-star">*</span>Contact</span></a>
   </div>
 </nav>
 
@@ -218,10 +218,247 @@
 The interface allows quick viewing of real-time verified news updates and comprehensive fact verification results. Users can also upload documents or statements for in-depth analysis. By making fact-checking accessible, transparent, and user-friendly, Truth Lens empowers individuals to make informed decisions and contribute to reducing the spread of fake news in society.</p>
 </div>
 
+<!-- FAQs Section -->
+<div class="container back" id="faqs-section">
+  <button class="back-btn" onclick="flipBack()">✕</button>
+  <h3>Frequently Asked Questions <span style="color: red;">*</span></h3>
+  
+  <div class="faqs-container">
+    <!-- Search Bar -->
+    <div class="faq-search">
+      <input type="text" id="faq-search-input" placeholder="🔍 Search FAQs..." onkeyup="searchFAQs()">
+    </div>
+
+    <!-- FAQ Categories -->
+    <div class="faq-categories">
+      <button class="faq-category-btn active" onclick="filterFAQs('all')">All</button>
+      <button class="faq-category-btn" onclick="filterFAQs('general')">General</button>
+      <button class="faq-category-btn" onclick="filterFAQs('fact-checking')">Fact Checking</button>
+      <button class="faq-category-btn" onclick="filterFAQs('account')">Account</button>
+      <button class="faq-category-btn" onclick="filterFAQs('technical')">Technical</button>
+    </div>
+
+    <!-- FAQs List -->
+    <div class="faqs-list">
+      <!-- General FAQs -->
+      <div class="faq-item" data-category="general">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">What is Truth Lens?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Truth Lens is a fact-checking platform designed to help you verify the credibility of news headlines and statements. Our AI-powered system analyzes content to distinguish between real and fake news, empowering users with accurate information.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="general">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">Is Truth Lens free to use?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Yes! Truth Lens is completely free to use. We believe accurate information should be accessible to everyone. No hidden charges or premium subscriptions required.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="general">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">How accurate is the fact-checking?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Our system uses advanced AI algorithms combined with expert-curated databases. While we strive for high accuracy, we recommend cross-referencing with multiple sources for critical information. Our accuracy rate is approximately 92% based on extensive testing.</p>
+        </div>
+      </div>
+
+      <!-- Fact Checking FAQs -->
+      <div class="faq-item" data-category="fact-checking">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">How do I check if news is real or fake?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Simply paste or type the news headline into Truth Lens and click "Check". Our system will analyze the content and provide you with a result indicating whether it's real or fake news. The analysis takes just a few seconds.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="fact-checking">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">Can I upload documents for checking?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Yes! You can upload text files (.txt), PDFs (.pdf), and Word documents (.doc, .docx). Click the "Upload" button and select your file. We'll extract the text and analyze it for you.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="fact-checking">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">What sources does Truth Lens use?</span>
+        </div>
+        <div class="faq-answer">
+          <p>We use a combination of trusted news sources, fact-checking databases, and credible publications. Our system continuously updates its knowledge base with verified information from reputable fact-checking organizations worldwide.</p>
+        </div>
+      </div>
+
+      <!-- Account FAQs -->
+      <div class="faq-item" data-category="account">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">Do I need to create an account?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Yes, creating an account allows you to save your check history, personalize your preferences, and access community forums. It's quick and free—just provide a username, email, and password.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="account">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">How do I access my check history?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Click the 📋 history button (available after signing in) to view all your previous fact checks. Your history is saved for easy reference and allows you to track patterns in misinformation.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="account">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">Is my data secure?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Yes! Your data is encrypted and securely stored. We never share personal information with third parties. All check history is private and accessible only to you. Read our Privacy Policy for more details.</p>
+        </div>
+      </div>
+
+      <!-- Technical FAQs -->
+      <div class="faq-item" data-category="technical">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">What browsers are supported?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Truth Lens works on all modern browsers: Chrome, Firefox, Safari, Edge, and Opera. For best performance, keep your browser updated to the latest version.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="technical">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">Can I use Truth Lens on mobile?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Yes! Truth Lens is fully responsive and works on mobile devices. You can access it through any mobile browser for on-the-go fact-checking.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" data-category="technical">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <span class="faq-icon">➕</span>
+          <span class="faq-title">How do I report a bug?</span>
+        </div>
+        <div class="faq-answer">
+          <p>Please use the "Report Fake News" section to report any technical issues you encounter. Include details about the bug and we'll investigate and fix it as soon as possible.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Section -->
+<div class="container back" id="contact-section">
+  <button class="back-btn" onclick="flipBack()">✕</button>
+  <h3>Contact Us <span style="color: red;">*</span></h3>
+  
+  <div class="contact-wrapper">
+    <!-- Contact Info -->
+    <div class="contact-info-box">
+      <h4>💬 Get in Touch</h4>
+      <div class="contact-detail">
+        <span class="contact-icon">📧</span>
+        <div>
+          <strong>Email</strong>
+          <p>support@truthlens.com</p>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <span class="contact-icon">📞</span>
+        <div>
+          <strong>Phone</strong>
+          <p>+1 (555) 123-4567</p>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <span class="contact-icon">📍</span>
+        <div>
+          <strong>Address</strong>
+          <p>Truth Lens Headquarters<br>Tech Park, City, Country</p>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <span class="contact-icon">🕒</span>
+        <div>
+          <strong>Hours</strong>
+          <p>Mon-Fri: 9:00 AM - 6:00 PM<br>Sat-Sun: 10:00 AM - 4:00 PM</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="contact-form-box">
+      <h4>✍️ Send Message</h4>
+      <form id="contact-form" onsubmit="handleContactSubmit(event)">
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" id="contact-name" placeholder="Enter your name" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="contact-email" placeholder="your@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Subject *</label>
+          <select id="contact-subject" required>
+            <option value="">-- Select Subject --</option>
+            <option value="support">Technical Support</option>
+            <option value="feedback">Feedback</option>
+            <option value="bug">Report Bug</option>
+            <option value="partnership">Partnership</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Message *</label>
+          <textarea id="contact-message" placeholder="Your message..." rows="4" required></textarea>
+        </div>
+
+        <button type="submit" class="contact-submit-btn">Send Message</button>
+      </form>
+      <div id="contact-response" style="margin-top: 10px; display: none; padding: 10px; border-radius: 6px; text-align: center; font-weight: 600;"></div>
+    </div>
+  </div>
+
+  <!-- Social Links -->
+  <div class="social-links">
+    <h4>Follow Us</h4>
+    <div class="social-icons">
+      <a href="#" class="social-icon" title="Twitter">𝕏</a>
+      <a href="#" class="social-icon" title="Facebook">f</a>
+      <a href="#" class="social-icon" title="LinkedIn">in</a>
+      <a href="#" class="social-icon" title="Instagram">📷</a>
+    </div>
+  </div>
+</div>
+
 <!-- Community Forums Section -->
 <div class="container back" id="community-section">
   <button class="back-btn" onclick="flipBack()">✕</button>
-  <h3>💬 Community Forums</h3>
+  <h3>Community Forums <span style="color: red;">*</span></h3>
   
   <div class="community-container">
     <!-- Forum Navigation Tabs -->
@@ -336,6 +573,61 @@ The interface allows quick viewing of real-time verified news updates and compre
   </div>
 </div>
 
+<!-- Privacy Policy Section -->
+<div class="container back" id="privacy-section">
+  <button class="back-btn" onclick="flipBack()">✕</button>
+  <h3>Privacy Policy <span style="color: red;">*</span></h3>
+  
+  <div class="privacy-simple">
+    <div class="privacy-item">
+      <h4>📌 Introduction</h4>
+      <p>Truth Lens is committed to protecting your privacy. This policy explains how we collect and use your information.</p>
+    </div>
+
+    <div class="privacy-item">
+      <h4>📊 What We Collect</h4>
+      <p>• Account information (username, email)<br>
+      • News headlines you check<br>
+      • Your IP address and device info<br>
+      • Usage data and preferences</p>
+    </div>
+
+    <div class="privacy-item">
+      <h4>🎯 How We Use It</h4>
+      <p>• To provide fact-checking service<br>
+      • To save your check history<br>
+      • To improve our platform<br>
+      • To keep you secure</p>
+    </div>
+
+    <div class="privacy-item">
+      <h4>🔐 Your Data Security</h4>
+      <p>We use SSL encryption and secure servers to protect your data. Your personal information is never sold to third parties.</p>
+    </div>
+
+    <div class="privacy-item">
+      <h4>👤 Your Rights</h4>
+      <p>You can request to access, modify, or delete your data anytime. Contact us at privacy@truthlens.com</p>
+    </div>
+
+    <div class="privacy-item">
+      <h4>🍪 Cookies</h4>
+      <p>We use cookies to keep you logged in and remember your preferences. You can disable them in your browser.</p>
+    </div>
+
+    <div class="privacy-item">
+      <h4>📧 Contact Us</h4>
+      <p><strong>Email:</strong> privacy@truthlens.com<br>
+      <strong>Phone:</strong> +1 (XXX) XXX-XXXX</p>
+    </div>
+
+    <div class="privacy-footer">
+      <p>Last updated: November 2025 | © 2025 Truth Lens</p>
+    </div>
+  </div>
+</div>
+
+
 <!-- Back Side 4 (Report Fake News) -->
 <div class="container back" id="report-section">
   <button class="back-btn" onclick="flipBack()">&#10005;</button>
@@ -365,7 +657,7 @@ The interface allows quick viewing of real-time verified news updates and compre
 <!-- Educational Resources Section -->
 <div class="container back" id="resources-section">
   <div class="resources-header">
-    <h2>📘 Educational Resources</h2>
+    <h3 style="margin-left:35%;">Educational Resources <span style="color: red;">*</span></h3>
     <button class="back-btn" onclick="flipBack()">✖</button>
   </div>
 

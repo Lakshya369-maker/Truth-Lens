@@ -232,7 +232,10 @@ function flipTo(section) {
     "flipped-signup",
     "flipped-resources",
     "flipped-history",
-    "flipped-community"
+    "flipped-community",
+    "flipped-faqs",
+    "flipped-privacy",
+    "flipped-contact"
   );
 
   if (section === "fact") {
@@ -259,6 +262,15 @@ function flipTo(section) {
     flipContainer.classList.add("flipped-history");
     console.log("✅ Flipped to HISTORY");
     loadUserHistory();
+  } else if (section === "faqs") {
+  flipContainer.classList.add("flipped-faqs");
+  console.log("✅ Flipped to FAQS");
+  } else if (section === "privacy") {
+  flipContainer.classList.add("flipped-privacy");
+  console.log("✅ Flipped to PRIVACY");
+  } else if (section === "contact") {
+  flipContainer.classList.add("flipped-contact");
+  console.log("✅ Flipped to CONTACT");
   }
 
   const links = document.querySelectorAll(".left-sidebar .sidebar-links a");
@@ -286,7 +298,10 @@ function flipBack() {
     "flipped-signup",
     "flipped-resources",
     "flipped-history",
-    "flipped-community"
+    "flipped-community",
+    "flipped-faqs",
+    "flipped-privacy",
+    "flipped-contact"
   );
 
   console.log("✅ Flipped back to main");
@@ -368,6 +383,118 @@ function launchConfetti() {
     }));
   }, 250);
 }
+
+// Handle Contact Form Submission
+function handleContactSubmit(event) {
+  event.preventDefault();
+  
+  const name = document.getElementById('contact-name').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const subject = document.getElementById('contact-subject').value;
+  const message = document.getElementById('contact-message').value.trim();
+  const responseDiv = document.getElementById('contact-response');
+  
+  // Simple validation
+  if (!name || !email || !subject || !message) {
+    responseDiv.style.display = 'block';
+    responseDiv.style.background = '#f8d7da';
+    responseDiv.style.color = '#721c24';
+    responseDiv.textContent = '❌ Please fill all fields';
+    return;
+  }
+  
+  // Log message (in real app, send to backend)
+  console.log('📧 Contact Form Submitted:', {
+    name,
+    email,
+    subject,
+    message,
+    timestamp: new Date().toLocaleString()
+  });
+  
+  // Show success message
+  responseDiv.style.display = 'block';
+  responseDiv.style.background = '#d4edda';
+  responseDiv.style.color = '#155724';
+  responseDiv.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
+  
+  // Reset form
+  document.getElementById('contact-form').reset();
+  
+  // Hide message after 3 seconds
+  setTimeout(() => {
+    responseDiv.style.display = 'none';
+  }, 3000);
+}
+
+// Toggle FAQ Item
+function toggleFAQ(element) {
+  const faqItem = element.parentElement;
+  const isOpen = faqItem.classList.contains('open');
+  
+  // Close all other FAQs
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.classList.remove('open');
+  });
+  
+  // Toggle current FAQ
+  if (!isOpen) {
+    faqItem.classList.add('open');
+    console.log('✅ FAQ opened');
+  } else {
+    faqItem.classList.remove('open');
+    console.log('✅ FAQ closed');
+  }
+}
+
+// Filter FAQs by Category
+function filterFAQs(category) {
+  const faqItems = document.querySelectorAll('.faq-item');
+  let visibleCount = 0;
+  
+  // Update active category button
+  document.querySelectorAll('.faq-category-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Show/hide FAQs based on category
+  faqItems.forEach(item => {
+    if (category === 'all' || item.dataset.category === category) {
+      item.classList.remove('hidden');
+      item.classList.remove('open');
+      visibleCount++;
+    } else {
+      item.classList.add('hidden');
+    }
+  });
+  
+  console.log(`✅ Showing ${visibleCount} FAQs in ${category} category`);
+}
+
+// Search FAQs
+function searchFAQs() {
+  const searchInput = document.getElementById('faq-search-input');
+  const searchTerm = searchInput.value.toLowerCase();
+  const faqItems = document.querySelectorAll('.faq-item');
+  let visibleCount = 0;
+  
+  faqItems.forEach(item => {
+    const title = item.querySelector('.faq-title').textContent.toLowerCase();
+    const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+    
+    if (title.includes(searchTerm) || answer.includes(searchTerm)) {
+      item.classList.remove('hidden');
+      visibleCount++;
+    } else {
+      item.classList.add('hidden');
+      item.classList.remove('open');
+    }
+  });
+  
+  console.log(`✅ Found ${visibleCount} FAQs matching "${searchTerm}"`);
+}
+
 
 // ========== AUTHENTICATION FUNCTIONS ==========
 
