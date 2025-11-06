@@ -3,6 +3,8 @@ from flask_cors import CORS
 from db_operations import add_user, get_user, authenticate, save_news_check, get_news_history, delete_history_item
 from database import create_table
 import os
+import requests
+from flask import jsonify
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -208,6 +210,13 @@ def delete_history_route(username, history_id):
             'success': False,
             'message': 'Error: ' + str(e)
         }), 500
+    
+@app.route('/api/news')
+def get_news():
+    api_key = "6cf1b91669b34cfa90a089173bc32bef"
+    url = f"https://newsapi.org/v2/top-headlines?language=en&pageSize=20&apiKey={api_key}"
+    response = requests.get(url)
+    return jsonify(response.json())
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

@@ -185,9 +185,8 @@ function switchForumTab(tabName) {
 
 async function fetchLatestNews() {
   try {
-    const response = await fetch(
-      `https://newsapi.org/v2/top-headlines?language=en&pageSize=20&apiKey=${apiKey}`
-    );
+    const response = await fetch(`${AUTH_API_URL}/api/news`);
+
     const data = await response.json();
 
     if (data.status !== "ok") {
