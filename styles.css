@@ -2016,32 +2016,33 @@ textarea.fake-glow {
   box-shadow: 0 4px 8px #111;
 }
 
-/* Responsive for smaller screens */
-@media (max-width: 768px) {
-  .contact-wrapper {
-    grid-template-columns: 1fr;
-  }
-}
-/* Contact Flip */
-.flip-container.flipped-contact .container.front { 
-  transform: rotateY(-180deg); 
-}
-.flip-container.flipped-contact #contact-section { 
-  transform: rotateY(0deg); 
-}
-
+/* ===== DESKTOP ONLY - BLOCK ALL OTHER DEVICES ===== */
 @media (max-width: 1024px) {
-  /* Hide all content, show block message */
-  body::before {
-    content: "⚠️ Desktop only...";
-    /* Shows on tablets */
+  html, body {
+    overflow: hidden !important;
+    height: 100vh !important;
+    width: 100vw !important;
   }
-}
-
-@media (max-width: 768px) {
-  /* Extra protection for mobile */
+  #app, .navbar, .main-layout, .left-sidebar, .left-content, .container, .right-news, .fact-check-tips, #resources-section, .theme-toggle, button, textarea, input, .flip-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
   body::before {
-    content: "📱 Use computer to access...";
-    /* Shows on phones */
+    content: "⚠️ This website is designed for laptop/desktop only.Please open this on a larger screen.";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #181818;
+    background: #fff;
+    text-align: center;
+    padding: 40px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    white-space: pre-line;
+    position: fixed;
+    width: 100vw;
+    z-index: 99999;
   }
 }
