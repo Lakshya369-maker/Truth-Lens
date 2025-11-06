@@ -210,7 +210,7 @@ def delete_history_route(username, history_id):
         }), 500
 
 if __name__ == '__main__':
-    print("🚀 Starting Flask server on localhost:5000...")
-    print("📝 Database initialized")
-    print("🌐 Frontend will access API at http://localhost:5000/api")
-    app.run(host='localhost', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"🚀 Starting Flask server on port {port}...")
+    app.run(host='0.0.0.0', port=port)
+
