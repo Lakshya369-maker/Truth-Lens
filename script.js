@@ -1,6 +1,6 @@
 const apiKey = "6cf1b91669b34cfa90a089173bc32bef";
 const backendURL = "http://192.168.137.248:5000/predict";
-const AUTH_API_URL = "https://truth-lens-fvxm.onrender.com";
+const AUTH_API_URL = "https://truth-lens-fvxm.onrender.com/api";
 let latestNewsTitles = [];
 window.lockFlip = false;
 
@@ -185,7 +185,7 @@ function switchForumTab(tabName) {
 
 async function fetchLatestNews() {
   try {
-    const response = await fetch(`${AUTH_API_URL}/api/news`);
+    const response = await fetch(`${AUTH_API_URL}/news`);
 
     const data = await response.json();
 
@@ -373,7 +373,7 @@ function launchConfetti() {
 
 async function testBackendConnection() {
   try {
-    const response = await fetch(`${AUTH_API_URL}/api/health`);
+    const response = await fetch(`${AUTH_API_URL}/signin`);
     const data = await response.json();
     console.log('✅ Backend connected:', data);
   } catch (error) {
