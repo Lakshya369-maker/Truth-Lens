@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truth Lens</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+  <div class="navbar-content">
+    <span class="app-title">Truth Lens</span>
+    <div class="theme-toggle" onclick="toggleTheme()">
+  <div class="toggle-thumb" id="toggle-thumb">❄️</div>
+  <div class="lock-icon" id="lock-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 160L256 224L384 224L384 160C384 124.7 355.3 96 320 96C284.7 96 256 124.7 256 160zM192 224L192 160C192 89.3 249.3 32 320 32C390.7 32 448 89.3 448 160L448 224C483.3 224 512 252.7 512 288L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 288C128 252.7 156.7 224 192 224z"/></svg></div>
+</div>
+
+
+
+    <div class="nav-links">
+      <div class="dropdown">
+        <a href="#" class="dropbtn">Hindi &#9662;</a>
+        <div class="dropdown-content">
+          <a href="https://www.aajtak.in/" target="_blank">Aaj Tak</a>
+          <a href="https://www.ndtv.com/hindi" target="_blank">NDTV Hindi</a>
+          <a href="https://www.jagran.com" target="_blank">Dainik Jagran</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropbtn">English &#9662;</a>
+        <div class="dropdown-content">
+          <a href="https://timesofindia.indiatimes.com/" target="_blank">Times of India</a>
+          <a href="https://www.hindustantimes.com/" target="_blank">Hindustan Times</a>
+          <a href="https://www.theguardian.com/international" target="_blank">The Guardian</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropbtn">Gujarati &#9662;</a>
+        <div class="dropdown-content">
+          <a href="https://www.gujaratsamachar.com/" target="_blank">Gujarat Samachar</a>
+          <a href="https://www.divyabhaskar.co.in/" target="_blank">Divya Bhaskar</a>
+          <a href="https://www.sandesh.com/" target="_blank">Sandesh</a>
+        </div>
+      </div>
+      <button style = "margin-top:5px;" class="signin-btn" onclick="flipTo('signin')">
+        <span class="signin-text">Sign In</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="user-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A4.978 4.978 0 0112 15a4.978 4.978 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+
+
+    <!-- Main Content -->
+    <div class="main-layout">
+  <nav class="left-sidebar" id="sidebar">
+    <button class="toggle-arrow" onclick="toggleSidebar()">&#10095;</button>
+  <div class="sidebar-links">
+    <a href="#" class="sidebar-link" onclick="flipTo('fact')"><span class="star-wrap"><span class="red-star">*</span>Fact Checking Tips</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('about')"><span class="star-wrap"><span class="red-star">*</span>About Us</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('howitworks')"><span class="star-wrap"><span class="red-star">*</span>How It Works</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('resources')"><span class="star-wrap"><span class="red-star">*</span>Educational Resources</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('community')"><span class="star-wrap"><span class="red-star">*</span>Community Forums</span></a>
+    <a href="#" class="sidebar-link" onclick="flipTo('report')"><span class="star-wrap"><span class="red-star">*</span>Report Fake News</span></a>
+    <a href="#" class="sidebar-link"><span class="star-wrap"><span class="red-star">*</span>FAQs</span></a>
+    <a href="#" class="sidebar-link"><span class="star-wrap"><span class="red-star">*</span>Privacy Policy</span></a>
+    <a href="#" class="sidebar-link"><span class="star-wrap"><span class="red-star">*</span>Contact</span></a>
+  </div>
+</nav>
+
+
+  <div class="left-content">
+  <div class="flip-container" id="flip-container">
+  <!-- Front Side (Main Input Section) -->
+ <div class="container front">
+  <div class="result-container">
+    <div id="result"></div>
+  </div>
+  
+  <!-- Heading with History Button -->
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px;">
+    <h2 style="margin: 0; flex: 1;">Enter News Headline</h2>
+    <button id="history-btn" style="background: #111; color: white; border: none; padding: 5px 5px; border-radius: 6px; cursor: pointer; font-size: 18px; display: none; transition: all 0.3s ease;" title="View Check History">
+  📋
+</button>
+
+  </div>
+  
+  <textarea id="newsInput" placeholder="Paste or type a news headline or statement..."></textarea>
+  
+  <div class="button-row">
+    <button onclick="checkNews()">Check</button>
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+      Upload
+      <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v4h16v-4M12 12v4m0-4l-4 4m4-4l4 4" />
+      </svg>
+      <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" style="display:none;" />
+    </button>
+  </div>
+</div>
+
+<!-- Back Side: History Card -->
+<div class="container back" id="history-section">
+  <button class="back-btn" onclick="flipBack()">✕</button>
+  <h3>📋 Check History</h3>
+  <div id="history-panel" class="history-panel">
+    
+    <div id="historyContainer"></div>
+</div>
+
+  <div id="history-list" style="padding: 10px;">
+    <p style="text-align: center; color: #999; padding: 20px;">Loading...</p>
+  </div>
+</div>
+
+
+
+
+  <!-- Back Side: News Result -->
+<div class="container back" id="news-result-section">
+  <h3 id="news-result-title">Result</h3>
+  <div id="news-result-card" class="news-result-card">
+    <p id="news-result-message">Your result will appear here.</p>
+  </div>
+  <button class="back-btn" onclick="flipBack()">&#10005;</button>
+  <canvas id="confetti-canvas"></canvas>
+</div>
+
+<!-- 🔐 Sign In Section (Flip Card) -->
+<div class="container back" id="signin-section">
+  <h2>Sign In</h2>
+
+  <form id="signin-form" onsubmit="handleSignIn(event)">
+    <div class="form-group">
+      <label for="signin-username">Username</label>
+      <input type="text" id="signin-username" placeholder="Enter your username" required />
+    </div>
+
+    <div class="form-group">
+      <label for="signin-password">Password</label>
+      <input type="password" id="signin-password" placeholder="Enter your password" required />
+    </div>
+
+    <div class="form-group form-actions">
+      <button id="signin-submit-btn" type="submit">Sign In</button>
+      <a href="#" style="text-decoration:underline" id="signup-link">Sign Up</a>
+    </div>
+  </form>
+
+  <!-- Result message (optional) -->
+  <div id="signin-result"></div>
+
+  <!-- ❌ Close Button -->
+  <button class="back-btn" onclick="flipBack()">&#10005;</button>
+</div>
+
+
+<!-- Sign Up Section -->
+<div class="container back" id="signup-section">
+  <button class="back-btn" onclick="flipBack()">✖</button>
+  <h2>Create an Account</h2>
+
+  <form id="signup-form" onsubmit="handleSignUp(event)">
+    <div class="form-group">
+      <label for="signup-username">Username</label>
+      <input type="text" id="signup-username" placeholder="Choose a username" required>
+    </div>
+
+    <div class="form-group">
+      <label for="signup-email">Email Address</label>
+      <input type="email" id="signup-email" placeholder="Enter your email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="signup-password">Password</label>
+      <input type="password" id="signup-password" placeholder="Create a password (min 4 chars)" required>
+    </div>
+
+    <div class="form-group">
+      <button id="signup-submit-btn" type="submit">Sign Up</button>
+    </div>
+
+    <div class="form-group form-actions">
+      <p>Already have an account? <a href="#" id="back-to-signin">Sign In</a></p>
+    </div>
+  </form>
+</div>
+
+
+  <!-- Back Side 1 (Fact Checking Tips) -->
+  <div class="container back" id="fact-check-section">
+    <h3>Fact Checking Tips <span style="color: red;">*</span></h3>
+    <div class="fact-check-card"><p>Check the source of the news.</p></div>
+    <div class="fact-check-card"><p>Look for multiple credible sources.</p></div>
+    <div class="fact-check-card"><p>Verify the publication date accuracy.</p></div>
+    <div class="fact-check-card"><p>Confirm quotes from credible experts.</p></div>
+    <button class="back-btn" onclick="flipBack()">&#10005;</button>
+  </div>
+
+  <!-- Back Side 2 (About Us) -->
+<div class="container back about" id="about-section">
+  <button class="back-btn" onclick="flipBack()">&#10005;</button>
+  <h3>About Us <span style="color: red;">*</span></h3>
+  <p>Truth Lens highlights our commitment to empowering users with accurate and reliable information in an era overflowing with news sources. Our platform is dedicated to helping individuals quickly and efficiently verify the credibility of news headlines and statements, encouraging critical thinking and informed decision-making. By combining an easy-to-use interface with expert-curated fact-checking tips and real-time news updates, Truth Lens strives to be a trustworthy companion in navigating the complex media landscape. Our mission is to combat misinformation and promote transparency, enabling users to discern truth amidst the noise confidently and responsibly. We source news from trusted outlets and equip users with the knowledge to question sources, detect bias, and verify claims. Our goal is to foster critical thinking and empower people to make better decisions based on verified facts. By facilitating transparency and promoting media literacy, Truth Lens actively contributes to a more informed and resilient public.We envision a world where truth prevails over misinformation, and everyone has the resources to participate responsibly in public discourse. Join us on this journey to create a safer, more truthful information environment.</p>
+</div>
+
+<!-- Back Side 3 (How It Works) -->
+<div class="container back" id="howitworks-section">
+  <button class="back-btn" onclick="flipBack()">&#10005;</button>
+  <h3>How It Works <span style="color: red;">*</span></h3>
+  <p>Truth Lens works by seamlessly integrating advanced fact-checking tools with trusted news sources to provide users an efficient way to verify news authenticity. When a user inputs a news headline or statement, our system analyzes it through a combination of AI algorithms and accepted fact-checking protocols to detect misleading or false information. Alongside, the platform offers curated fact-checking tips to educate users on critically assessing news.
+
+The interface allows quick viewing of real-time verified news updates and comprehensive fact verification results. Users can also upload documents or statements for in-depth analysis. By making fact-checking accessible, transparent, and user-friendly, Truth Lens empowers individuals to make informed decisions and contribute to reducing the spread of fake news in society.</p>
+</div>
+
+<!-- Community Forums Section -->
+<div class="container back" id="community-section">
+  <button class="back-btn" onclick="flipBack()">✕</button>
+  <h3>💬 Community Forums</h3>
+  
+  <div class="community-container">
+    <!-- Forum Navigation Tabs -->
+    <div class="forum-tabs">
+      <button class="forum-tab active" onclick="switchForumTab('discussions')">💭 Discussions</button>
+      <button class="forum-tab" onclick="switchForumTab('questions')">❓ Q&A</button>
+      <button class="forum-tab" onclick="switchForumTab('tips')">💡 Tips & Tricks</button>
+    </div>
+
+    <!-- Discussions Tab -->
+    <div id="discussions-tab" class="forum-tab-content active">
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 John Doe</span>
+          <span class="post-time">2 hours ago</span>
+        </div>
+        <h4 class="post-title">How to identify deep fakes?</h4>
+        <p class="post-content">I've been struggling to identify deepfake videos. What are some reliable indicators?</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 12 replies</span>
+          <span class="post-likes">❤️ 45 likes</span>
+        </div>
+      </div>
+
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 Sarah Smith</span>
+          <span class="post-time">5 hours ago</span>
+        </div>
+        <h4 class="post-title">Best fact-checking websites for 2025</h4>
+        <p class="post-content">Sharing my list of most reliable fact-checking sources and how to use them effectively...</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 8 replies</span>
+          <span class="post-likes">❤️ 67 likes</span>
+        </div>
+      </div>
+
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 Mike Johnson</span>
+          <span class="post-time">1 day ago</span>
+        </div>
+        <h4 class="post-title">Spotting misleading headlines</h4>
+        <p class="post-content">Let's discuss common techniques used in misleading headlines and how to recognize them...</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 23 replies</span>
+          <span class="post-likes">❤️ 120 likes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q&A Tab -->
+    <div id="questions-tab" class="forum-tab-content">
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 Emma Wilson</span>
+          <span class="post-time">3 hours ago</span>
+        </div>
+        <h4 class="post-title">❓ What's the difference between satire and fake news?</h4>
+        <p class="post-content">I'm confused about the difference. Can someone explain?</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 5 replies</span>
+          <span class="post-likes">❤️ 32 likes</span>
+        </div>
+      </div>
+
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 Alex Lee</span>
+          <span class="post-time">1 day ago</span>
+        </div>
+        <h4 class="post-title">❓ How do I verify images online?</h4>
+        <p class="post-content">What tools can I use to verify if an image has been edited or taken out of context?</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 9 replies</span>
+          <span class="post-likes">❤️ 56 likes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips & Tricks Tab -->
+    <div id="tips-tab" class="forum-tab-content">
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 Chris Brown</span>
+          <span class="post-time">2 days ago</span>
+        </div>
+        <h4 class="post-title">💡 5 Quick Tips to Check Source Credibility</h4>
+        <p class="post-content">✅ Check for author credentials<br>✅ Look for publication date<br>✅ Verify with multiple sources<br>✅ Check for bias indicators<br>✅ Use reverse image search</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 15 replies</span>
+          <span class="post-likes">❤️ 234 likes</span>
+        </div>
+      </div>
+
+      <div class="forum-post">
+        <div class="post-header">
+          <span class="post-author">👤 Lisa Anderson</span>
+          <span class="post-time">3 days ago</span>
+        </div>
+        <h4 class="post-title">💡 Browser Extensions for Fact Checkers</h4>
+        <p class="post-content">Here are my favorite browser extensions that make fact-checking easier...</p>
+        <div class="post-meta">
+          <span class="post-replies">💬 11 replies</span>
+          <span class="post-likes">❤️ 189 likes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create New Post Button -->
+    <button class="create-post-btn">➕ Create New Post</button>
+  </div>
+</div>
+
+<!-- Back Side 4 (Report Fake News) -->
+<div class="container back" id="report-section">
+  <button class="back-btn" onclick="flipBack()">&#10005;</button>
+  <h3>Report Fake News <span style="color: red;">*</span></h3>
+  <form id="reportForm">
+    <div class="form-group">
+      <label for="reporterName">Your Name</label>
+      <input type="text" id="reporterName" placeholder="Enter your name" required>
+    </div>
+    <div class="form-group">
+      <label for="reporterEmail">Email</label>
+      <input type="email" id="reporterEmail" placeholder="Enter your email" required>
+    </div>
+    <div class="form-group">
+      <label for="fakeNewsTitle">News Headline</label>
+      <input type="text" id="fakeNewsTitle" placeholder="Enter the headline" required>
+    </div>
+    <div class="form-group">
+      <label for="fakeNewsDetails">Details / Evidence</label>
+      <textarea id="fakeNewsDetails" placeholder="Provide details or attach evidence" required></textarea>
+    </div>
+    <button type="submit">Submit Report</button>
+  </form>
+  <div id="reportResult" style="margin-top:10px; font-weight:bold;"></div>
+</div>
+
+<!-- Educational Resources Section -->
+<div class="container back" id="resources-section">
+  <div class="resources-header">
+    <h2>📘 Educational Resources</h2>
+    <button class="back-btn" onclick="flipBack()">✖</button>
+  </div>
+
+  <p class="resources-intro">
+    Expand your knowledge and learn how to identify misinformation using credible resources, tutorials, and media literacy courses.
+  </p>
+
+  <div class="resources-grid">
+    <div class="resource-card">
+      <div class="resource-icon">🧠</div>
+      <h3>Critical Thinking 101</h3>
+      <p>Sharpen your reasoning skills and learn how to analyze information objectively.</p>
+      <a href="#" target="_blank">Explore →</a>
+    </div>
+
+    <div class="resource-card">
+      <div class="resource-icon">🔍</div>
+      <h3>Top Fact-Checking Websites</h3>
+      <p>Discover trusted websites like Snopes, PolitiFact, and FactCheck.org for verification.</p>
+      <a href="#" target="_blank">Visit →</a>
+    </div>
+
+    <div class="resource-card">
+      <div class="resource-icon">🎥</div>
+      <h3>Educational Videos</h3>
+      <p>Watch videos on spotting fake news and understanding social media misinformation.</p>
+      <a href="#" target="_blank">Watch Now →</a>
+    </div>
+
+    <div class="resource-card">
+      <div class="resource-icon">📚</div>
+      <h3>Media Literacy Courses</h3>
+      <p>Take interactive online courses to improve your digital media awareness.</p>
+      <a href="#" target="_blank">Join Free →</a>
+    </div>
+
+    <div class="resource-card">
+      <div class="resource-icon">💬</div>
+      <h3>Community Discussions</h3>
+      <p>Engage with like-minded people and share tips on identifying misinformation.</p>
+      <a href="#" target="_blank">Join Forum →</a>
+    </div>
+  </div>
+</div>
+
+
+</div>
+  </div>
+
+  <div class="right-news">
+    <h3 style="color:#f94e4e; text-align:center; margin-bottom: 10px;"><u>Latest News</u></h3>
+    <ul class="news-list" id="news-list">
+      
+    </ul>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="script.js"></script>
+<div id="fire-effect"></div>
+<div id="snow-effect"></div>
+
+<!-- 🔍 Floating Magnifying Glass Loader -->
+<div id="magnifier-loader" class="magnifier hidden">
+  <div class="glass"></div>
+</div>
+<!-- 🔍 Multi Magnifier Loader Overlay -->
+<div id="magnifier-overlay" class="hidden">
+  <div class="magnifier small"></div>
+  <div class="magnifier small delay1"></div>
+  <div class="magnifier small delay2"></div>
+</div>
+
+</body>
+</html>

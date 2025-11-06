@@ -1,0 +1,216 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from db_operations import add_user, get_user, authenticate, save_news_check, get_news_history, delete_history_item
+from database import create_table
+import os
+
+app = Flask(__name__, static_folder='.', static_url_path='')
+
+# Enable CORS for same machine requests
+CORS(app)
+
+# Initialize database on startup
+create_table()
+print("✅ Database initialized")
+
+# ============ API Routes ============
+
+# Health Check
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'Backend is running', 'message': 'Connected'}), 200
+
+# Sign Up Route
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+
+        if not username or not email or not password:
+            return jsonify({
+                'success': False,
+                'message': 'All fields are required'
+            }), 400
+
+        if len(password) < 4:
+            return jsonify({
+                'success': False,
+                'message': 'Password must be at least 4 characters'
+            }), 400
+
+        if add_user(username, email, password):
+            return jsonify({
+                'success': True,
+                'message': '✅ User registered successfully! Please sign in.'
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Username or email already exists'
+            }), 400
+
+    except Exception as e:
+        print(f"❌ Signup error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Server error: ' + str(e)
+        }), 500
+
+# Sign In Route
+@app.route('/api/signin', methods=['POST'])
+def signin():
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+
+        if not username or not password:
+            return jsonify({
+                'success': False,
+                'message': 'Username and password required'
+            }), 400
+
+        if authenticate(username, password):
+            return jsonify({
+                'success': True,
+                'message': '✅ Login successful',
+                'username': username
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': '❌ Invalid username or password'
+            }), 401
+
+    except Exception as e:
+        print(f"❌ Signin error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Server error: ' + str(e)
+        }), 500
+
+# Get User Info
+@app.route('/api/user/<username>', methods=['GET'])
+def get_user_info(username):
+    try:
+        user = get_user(username)
+        if user:
+            return jsonify({
+                'success': True,
+                'user': {
+                    'id': user[0],
+                    'username': user[1],
+                    'email': user[2]
+                }
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Error: ' + str(e)
+        }), 500
+
+# Get user's news history
+@app.route('/api/user/<username>/history', methods=['GET'])
+def get_user_history_route(username):
+    try:
+        print(f"📚 Getting history for {username}")
+        history = get_news_history(username)
+        print(f"✅ Found {len(history)} items")
+        
+        history_list = [
+            {
+                'id': item[0],
+                'headline': item[1],
+                'result': item[2],
+                'checked_at': item[3]
+            }
+            for item in history
+        ]
+        
+        return jsonify({
+            'success': True,
+            'history': history_list
+        }), 200
+    except Exception as e:
+        print(f"❌ Error getting history: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Error: ' + str(e)
+        }), 500
+
+# Save news check to history
+@app.route('/api/user/<username>/save-check', methods=['POST'])
+def save_news_check_route(username):
+    try:
+        data = request.get_json()
+        headline = data.get('headline', '').strip()
+        result = data.get('result', '').strip()
+        
+        print(f"💾 Save check for {username}: '{headline[:30]}...' = {result}")
+        
+        if not headline or not result:
+            return jsonify({
+                'success': False,
+                'message': 'Headline and result required'
+            }), 400
+        
+        if save_news_check(username, headline, result):
+            print(f"✅ Saved successfully")
+            return jsonify({
+                'success': True,
+                'message': 'News check saved to history'
+            }), 200
+        else:
+            print(f"❌ Failed to save")
+            return jsonify({
+                'success': False,
+                'message': 'Failed to save to history'
+            }), 400
+            
+    except Exception as e:
+        print(f"❌ Error saving: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Error: ' + str(e)
+        }), 500
+
+# Delete history item
+@app.route('/api/user/<username>/history/<int:history_id>', methods=['DELETE'])
+def delete_history_route(username, history_id):
+    try:
+        print(f"🗑️ Deleting history item {history_id}")
+        
+        if delete_history_item(history_id):
+            print(f"✅ Deleted successfully")
+            return jsonify({
+                'success': True,
+                'message': 'History item deleted'
+            }), 200
+        else:
+            print(f"❌ Item not found")
+            return jsonify({
+                'success': False,
+                'message': 'History item not found'
+            }), 404
+            
+    except Exception as e:
+        print(f"❌ Error deleting: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Error: ' + str(e)
+        }), 500
+
+if __name__ == '__main__':
+    print("🚀 Starting Flask server on localhost:5000...")
+    print("📝 Database initialized")
+    print("🌐 Frontend will access API at http://localhost:5000/api")
+    app.run(host='localhost', port=5000, debug=True)
