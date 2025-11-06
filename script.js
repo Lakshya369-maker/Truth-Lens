@@ -374,7 +374,7 @@ function launchConfetti() {
 
 async function testBackendConnection() {
   try {
-    const response = await fetch(`${AUTH_API_URL}/health`);
+    const response = await fetch(`${AUTH_API_URL}/api/health`);
     const data = await response.json();
     console.log('✅ Backend connected:', data);
   } catch (error) {
