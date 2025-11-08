@@ -16,6 +16,14 @@ CORS(app, resources={r"/api/*": {"origins": [
     "https://truth-lens-ruby.vercel.app",   # ✅ Your Vercel frontend
     "http://localhost:5173",                # ✅ Optional local testing
 ]}}, supports_credentials=True)
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add("Access-Control-Allow-Origin", "https://truth-lens-ruby.vercel.app")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE")
+    return response
+
 # === Initialize Database ===
 create_table()
 print("✅ Database initialized")
