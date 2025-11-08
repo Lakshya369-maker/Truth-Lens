@@ -11,8 +11,11 @@ from sentence_transformers import SentenceTransformer
 
 # === Flask App Setup ===
 app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)
-
+# Allow only your frontend domain
+CORS(app, resources={r"/api/*": {"origins": [
+    "https://truth-lens-ruby.vercel.app",   # ✅ Your Vercel frontend
+    "http://localhost:5173",                # ✅ Optional local testing
+]}}, supports_credentials=True)
 # === Initialize Database ===
 create_table()
 print("✅ Database initialized")
