@@ -17,12 +17,6 @@ CORS(app, origins=[
     "http://localhost:5173"                # for local testing
 ], supports_credentials=True)
 
-# Allow only your frontend domain
-CORS(app, resources={r"/api/*": {"origins": [
-    "https://truth-lens-ruby.vercel.app",   # ✅ Your Vercel frontend
-    "http://localhost:5173",                # ✅ Optional local testing
-]}}, supports_credentials=True)
-
 # === Initialize Database ===
 create_table()
 print("✅ Database initialized")
