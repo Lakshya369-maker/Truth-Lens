@@ -7,6 +7,7 @@ import requests
 from flask import jsonify
 import joblib
 from pathlib import Path
+import re
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -229,6 +230,14 @@ def get_news():
 
 # ============ AI Fake News Detection ============
 
+def preprocess_text(text):
+    """Normalize text just like in training"""
+    text = text.lower()
+    text = re.sub(r"http\S+", "", text)          # remove URLs
+    text = re.sub(r"[^a-z\s]", "", text)         # remove special characters and numbers
+    text = re.sub(r"\s+", " ", text).strip()     # remove extra spaces
+    return text
+
 @app.route('/api/predict', methods=['POST'])
 def predict_news():
     try:
@@ -237,15 +246,27 @@ def predict_news():
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
 
-        X = english_vectorizer.transform([text])
-        pred = english_model.predict(X)[0]
-        print("🧠 Raw prediction from model:", pred)  # 👈 Add this line
+        # ✅ Preprocess the text
+        clean_text = preprocess_text(text)
 
-        result = "REAL NEWS" if str(pred).upper() == "REAL" else "FAKE NEWS"
+        # ✅ Predict
+        X = english_vectorizer.transform([clean_text])
+        proba = english_model.predict_proba(X)[0]
+        confidence = round(max(proba) * 100, 2)
+        pred = english_model.classes_[proba.argmax()]
+
+        print(f"🧠 Raw prediction: {pred} | Confidence: {confidence}% | Text: {clean_text[:80]}...")
+
+        # ✅ Use lowercase check
+        if confidence < 55:
+            result = "UNCERTAIN"
+        else:
+            result = "REAL NEWS" if str(pred).lower() == "real" else "FAKE NEWS"
 
         return jsonify({
             "success": True,
-            "prediction": result
+            "prediction": result,
+            "confidence": confidence
         }), 200
 
     except Exception as e:
