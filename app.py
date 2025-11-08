@@ -16,8 +16,8 @@ CORS(app)
 
 # === Load ML model ===
 MODELS_DIR = Path(__file__).resolve().parent / "models"
-english_vectorizer = joblib.load(MODELS_DIR / "tfidf_english_vectorizer.joblib")
-english_model = joblib.load(MODELS_DIR / "tfidf_english_clf.joblib")
+english_vectorizer = joblib.load(MODELS_DIR / "tfidf_english_vectorizer_v2.joblib")
+english_model = joblib.load(MODELS_DIR / "tfidf_english_clf_v2.joblib")
 print("✅ English model loaded successfully")
 
 
