@@ -5,11 +5,20 @@ from database import create_table
 import os
 import requests
 from flask import jsonify
+import joblib
+from pathlib import Path
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 # Enable CORS for same machine requests
 CORS(app)
+
+# === Load ML model ===
+MODELS_DIR = Path(__file__).resolve().parent / "models"
+english_vectorizer = joblib.load(MODELS_DIR / "tfidf_english_vectorizer.joblib")
+english_model = joblib.load(MODELS_DIR / "tfidf_english_clf.joblib")
+print("✅ English model loaded successfully")
+
 
 # Initialize database on startup
 create_table()
@@ -217,6 +226,34 @@ def get_news():
     url = f"https://newsapi.org/v2/top-headlines?language=en&pageSize=20&apiKey={api_key}"
     response = requests.get(url)
     return jsonify(response.json())
+
+# ============ AI Fake News Detection ============
+
+@app.route('/api/predict', methods=['POST'])
+def predict_news():
+    try:
+        data = request.get_json(force=True)
+        text = data.get("text", "").strip()
+        if not text:
+            return jsonify({"success": False, "message": "No text provided"}), 400
+
+        # Predict using trained model
+        X = english_vectorizer.transform([text])
+        pred = english_model.predict(X)[0]
+        result = "REAL NEWS" if pred.upper() == "REAL" else "FAKE NEWS"
+
+        return jsonify({
+            "success": True,
+            "prediction": result
+        }), 200
+
+    except Exception as e:
+        print(f"❌ Prediction error: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "Server error: " + str(e)
+        }), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
