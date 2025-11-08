@@ -231,11 +231,10 @@ def get_news():
 # ============ AI Fake News Detection ============
 
 def preprocess_text(text):
-    """Normalize text just like in training"""
     text = text.lower()
-    text = re.sub(r"http\S+", "", text)          # remove URLs
-    text = re.sub(r"[^a-z\s]", "", text)         # remove special characters and numbers
-    text = re.sub(r"\s+", " ", text).strip()     # remove extra spaces
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
     return text
 
 @app.route('/api/predict', methods=['POST'])
@@ -246,27 +245,22 @@ def predict_news():
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
 
-        # ✅ Preprocess the text
+        # 🧠 Preprocess
         clean_text = preprocess_text(text)
 
-        # ✅ Predict
+        # 🧠 Predict (PassiveAggressiveClassifier has no predict_proba)
         X = english_vectorizer.transform([clean_text])
-        proba = english_model.predict_proba(X)[0]
-        confidence = round(max(proba) * 100, 2)
-        pred = english_model.classes_[proba.argmax()]
+        pred = english_model.predict(X)[0]
 
-        print(f"🧠 Raw prediction: {pred} | Confidence: {confidence}% | Text: {clean_text[:80]}...")
+        # 🔍 Display raw info
+        print(f"🧠 Raw prediction: {pred} | Text: {clean_text[:80]}...")
 
-        # ✅ Use lowercase check
-        if confidence < 55:
-            result = "UNCERTAIN"
-        else:
-            result = "REAL NEWS" if str(pred).lower() == "real" else "FAKE NEWS"
+        # 🧠 Decide label
+        result = "REAL NEWS" if str(pred).lower() == "real" else "FAKE NEWS"
 
         return jsonify({
             "success": True,
-            "prediction": result,
-            "confidence": confidence
+            "prediction": result
         }), 200
 
     except Exception as e:
