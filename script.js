@@ -1,10 +1,8 @@
 const apiKey = "6cf1b91669b34cfa90a089173bc32bef";
-// 🔹 This should be your Render backend root (not local IP)
-const BACKEND_BASE = "https://truth-lens-backend.onrender.com";  // your Render backend URL
-
-// 🔹 Define API endpoints cleanly
+const BACKEND_BASE = "https://truth-lens-fvxm.onrender.com";  // your Render backend
 const backendURL = `${BACKEND_BASE}/api/predict`;
 const AUTH_API_URL = `${BACKEND_BASE}/api`;
+
 let latestNewsTitles = [];
 window.lockFlip = false;
 
