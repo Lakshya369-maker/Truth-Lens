@@ -237,10 +237,11 @@ def predict_news():
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
 
-        # Predict using trained model
         X = english_vectorizer.transform([text])
         pred = english_model.predict(X)[0]
-        result = "REAL NEWS" if pred.upper() == "REAL" else "FAKE NEWS"
+        print("🧠 Raw prediction from model:", pred)  # 👈 Add this line
+
+        result = "REAL NEWS" if str(pred).upper() == "REAL" else "FAKE NEWS"
 
         return jsonify({
             "success": True,
