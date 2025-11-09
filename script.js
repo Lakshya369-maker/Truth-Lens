@@ -96,7 +96,7 @@ async function checkNews() {
     ]);
 
     const data = await response.json();
-    const result = data.result;
+    const result = data.prediction;
 
     overlay.classList.add("hidden");
     document.body.style.pointerEvents = "auto";
