@@ -185,48 +185,55 @@ function switchForumTab(tabName) {
   console.log('✅ Switched to', tabName, 'tab');
 }
 
-async function fetchLatestNews() {
+async function fetchLatestNews(retryCount = 0) {
   const ul = document.getElementById("news-list");
   const loader = document.getElementById("news-loader");
 
-  // Show loader initially
   loader.style.display = "flex";
   ul.style.display = "none";
 
   try {
-    const response = await fetch(`${AUTH_API_URL}/news`);
+    const response = await fetch(`${AUTH_API_URL}/news`, { cache: "no-store" });
+    
+    if (!response.ok) throw new Error(`Status ${response.status}`);
     const data = await response.json();
 
     if (data.status !== "ok") {
       console.error("Error fetching news:", data);
-      loader.innerHTML = "<p style='color:red;'>⚠️ Failed to load news</p>";
-      return;
+      throw new Error("Invalid response format");
     }
 
     latestNewsTitles = [];
     ul.innerHTML = "";
 
-    // Limit to first 14 news only
     data.articles.slice(0, 14).forEach((article) => {
       if (article.title) {
         latestNewsTitles.push(article.title.trim().toLowerCase());
       }
-
       const li = document.createElement("li");
       li.textContent = article.title;
       ul.appendChild(li);
     });
 
-    // Hide loader and show list
     loader.style.display = "none";
     ul.style.display = "block";
 
   } catch (error) {
-    console.error("Fetch error:", error);
-    loader.innerHTML = "<p style='color:red;'>❌ Unable to connect to backend</p>";
+    console.warn(`⚠️ Backend not ready yet (attempt ${retryCount + 1})`);
+
+    // Reset loader animation to indicate it’s still alive
+    loader.style.animation = "none";
+    void loader.offsetWidth; // force reflow
+    loader.style.animation = "loaderFade 2s ease-in-out infinite";
+
+    // Keep bouncing dots visible while retrying
+    if (retryCount < 6) {
+      setTimeout(() => fetchLatestNews(retryCount + 1), 10000);
+    } else {
+      loader.innerHTML = "<p style='color:red;'>❌ Backend still not responding. Please refresh.</p>";
+    }
   }
 }
-
 
 function flipTo(section) {
   // ⭐ Prevent flip while locked

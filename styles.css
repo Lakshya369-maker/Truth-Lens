@@ -2084,6 +2084,8 @@ textarea.fake-glow {
   margin: 30px auto;
   height: 40px;
   gap: 10px;
+  animation: loaderFade 2s ease-in-out infinite; /* ✨ fade breathing effect */
+  opacity: 0.9;
 }
 
 .news-loader .dot {
@@ -2111,4 +2113,8 @@ textarea.fake-glow {
   40% {
     transform: translateY(-10px);
   }
+}
+@keyframes loaderFade {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
