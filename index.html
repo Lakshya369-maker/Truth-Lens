@@ -50,8 +50,8 @@
         </svg>
       </button>
       <button id="logout-btn" class="logout-btn" onclick="simulateSignOut(false)" title="Logout">
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M9 12h12m0 0l-3-3m3 3l-3 3" />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" stroke-width="2" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M7 10h8m0 0l-3-3m3 3l-3 3M13 5v10a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h4a2 2 0 012 2z" />
   </svg>
 </button>
     </div>
@@ -740,6 +740,14 @@ The interface allows quick viewing of real-time verified news updates and compre
 </div>
 <!-- Toast Notification Container -->
 <div id="toast" class="toast"></div>
+<!-- 🌟 Universal Popup Box -->
+<div id="popup-overlay" class="popup-overlay hidden">
+  <div class="popup-box">
+    <div class="popup-icon">⚠️</div>
+    <div class="popup-message">This is a message</div>
+    <button class="popup-btn" onclick="closePopup()">OK</button>
+  </div>
+</div>
 
 </body>
 </html>

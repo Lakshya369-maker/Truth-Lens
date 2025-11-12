@@ -2161,24 +2161,102 @@ textarea.fake-glow {
 .toast.warning { background-color: #f57c00; }
 
 /* ===== Logout Button Styling ===== */
+/* ===== Logout Button Styling ===== */
 .logout-btn {
-  display: none;
   background: transparent;
   border: none;
   cursor: pointer;
+  display: none; /* hidden by default */
   margin-left: 8px;
-  transition: transform 0.25s ease, filter 0.25s ease;
+  padding: 4px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.9;
+  align-items: center;
+  justify-content: center;
 }
 
 .logout-btn svg {
-  width: 26px;
-  height: 26px;
-  stroke: white;
-  transition: stroke 0.3s ease;
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
 }
 
-.logout-btn:hover svg {
-  stroke: #ff4b4b;
+.logout-btn:hover {
   transform: scale(1.1);
-  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6));
+  opacity: 1;
 }
+
+.logout-btn:active {
+  transform: scale(0.95);
+}
+
+/* ===== Universal Popup Box Styling ===== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.3s ease;
+}
+
+.popup-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.popup-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 30px;
+  text-align: center;
+  width: 320px;
+  max-width: 90%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transform: scale(0.95);
+  animation: popupIn 0.3s ease forwards;
+}
+
+.popup-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.popup-message {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.popup-btn {
+  padding: 8px 20px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.popup-btn:hover {
+  background: #0056b3;
+}
+
+@keyframes popupIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Optional: theme colors for popup icons */
+.popup-box.success .popup-icon { color: #28a745; }
+.popup-box.error .popup-icon { color: #dc3545; }
+.popup-box.warning .popup-icon { color: #ffc107; }
+.popup-box.info .popup-icon { color: #007bff; }

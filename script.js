@@ -20,14 +20,12 @@ async function checkNews() {
   const overlay = document.getElementById('magnifier-overlay');
 
   if (!userInput) {
-    alert("⚠️ Please enter a news headline or statement!");
-    return;
+    showPopup("⚠️ Please enter a news headline or statement!", "warning");
   }
 
   const wordCount = userInput.split(/\s+/).filter(w => w.length > 0).length;
   if (wordCount < 10) {
-    alert(`⚠️ Please enter at least 10 words (currently ${wordCount}).`);
-    return;
+    showPopup("⚠️ Please enter at least 10 words.", "warning");
   }
 
   resultTitle.textContent = "";
@@ -386,6 +384,42 @@ function showToast(message, type = "info") {
     toast.classList.remove("show");
   }, 3000);
 }
+
+// ===== POPUP HANDLER =====
+function showPopup(message, type = "info") {
+  const overlay = document.getElementById("popup-overlay");
+  const box = overlay.querySelector(".popup-box");
+  const msg = overlay.querySelector(".popup-message");
+  const icon = overlay.querySelector(".popup-icon");
+
+  if (!overlay) {
+    console.error("⚠️ Popup overlay not found in HTML");
+    return;
+  }
+
+  // Set message
+  msg.textContent = message;
+
+  // Choose icon by type
+  let emoji = "ℹ️";
+  if (type === "success") emoji = "✅";
+  else if (type === "error") emoji = "❌";
+  else if (type === "warning") emoji = "⚠️";
+
+  icon.textContent = emoji;
+
+  // Set class for color styling
+  box.className = `popup-box ${type}`;
+
+  // Show popup
+  overlay.classList.remove("hidden");
+}
+
+function closePopup() {
+  const overlay = document.getElementById("popup-overlay");
+  overlay.classList.add("hidden");
+}
+
 
 
 function createSnow() {
