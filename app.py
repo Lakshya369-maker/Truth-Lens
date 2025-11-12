@@ -60,8 +60,15 @@ def signup():
         if len(password) < 4:
             return jsonify({'success': False, 'message': 'Password must be at least 4 characters'}), 400
 
-        if add_user(username, email, password):
-            return jsonify({'success': True, 'message': '✅ User registered successfully! Please sign in.'}), 201
+        # Save user (if not already exists)
+        user_added = add_user(username, email, password)
+        if user_added:
+            # Instead of telling user to sign in, tell frontend to verify OTP
+            return jsonify({
+                'success': True,
+                'message': 'OTP verification required',
+                'email': email
+            }), 201
         else:
             return jsonify({'success': False, 'message': 'Username or email already exists'}), 400
 

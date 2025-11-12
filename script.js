@@ -627,21 +627,17 @@ async function handleSignUp(event) {
 
     const data = await response.json();
 
-    if (data.success) {
-  // store user email for OTP verification
-  otpEmail = email;
-  generatedOTP = generateOTP();
-
-  // send OTP email
-  sendOTPEmail(email, generatedOTP);
-
-  // flip to OTP card
-  flipTo('otp');
-}
- else {
-      showPopup(`❌ ${data.message}`,'error');
-    }
-  } catch (error) {
+    if (data.success && data.message.includes("OTP")) {
+      otpEmail = data.email;
+      generatedOTP = generateOTP();
+      sendOTPEmail(otpEmail, generatedOTP);
+      flipTo("otp");
+    } else if (data.success) {
+      showPopup("✅ Account created! Please verify via OTP.", "success");
+      flipTo("otp");
+    } else {
+      showPopup(`❌ ${data.message}`, "error");
+    }}catch (error) {
     console.error('Sign Up Error:', error);
     showPopup('❌ Error: ' + error.message,'error');
   }
