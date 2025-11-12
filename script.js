@@ -250,7 +250,8 @@ function flipTo(section) {
     "flipped-community",
     "flipped-faqs",
     "flipped-privacy",
-    "flipped-contact"
+    "flipped-contact",
+    "flipped-otp"
   );
 
   if (section === "fact") {
@@ -287,6 +288,11 @@ function flipTo(section) {
   flipContainer.classList.add("flipped-contact");
   console.log("✅ Flipped to CONTACT");
   }
+  else if (section === "otp") {
+  flipContainer.classList.add("flipped-otp");
+  console.log("✅ Flipped to OTP Verification");
+  }
+
 
   const links = document.querySelectorAll(".left-sidebar .sidebar-links a");
   links.forEach((link) => link.classList.remove("active"));
@@ -622,18 +628,75 @@ async function handleSignUp(event) {
     const data = await response.json();
 
     if (data.success) {
-      showPopup("✅ Sign Up Successful! You can now sign in.", "success");
-      document.getElementById('signup-form').reset();
-      
-      setTimeout(() => {
-        flipTo('signin');
-      }, 800);
-    } else {
+  // store user email for OTP verification
+  otpEmail = email;
+  generatedOTP = generateOTP();
+
+  // send OTP email
+  sendOTPEmail(email, generatedOTP);
+
+  // flip to OTP card
+  flipTo('otp');
+}
+ else {
       showPopup(`❌ ${data.message}`,'error');
     }
   } catch (error) {
     console.error('Sign Up Error:', error);
     showPopup('❌ Error: ' + error.message,'error');
+  }
+}
+
+let generatedOTP = null;
+let otpEmail = null;
+
+// ===== Generate 6-digit OTP =====
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// ===== Send OTP via EmailJS =====
+async function sendOTPEmail(email) {
+  try {
+    const response = await fetch(`${AUTH_API_URL}/send-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      generatedOTP = data.otp;
+      showPopup("✅ OTP sent to your email!", "success");
+    } else {
+      showPopup("❌ Failed to send OTP. Try again later.", "error");
+    }
+  } catch (error) {
+    console.error("❌ Error:", error);
+    showPopup("❌ Network error while sending OTP.", "error");
+  }
+}
+
+
+// ===== Resend OTP =====
+function resendOTP() {
+  if (!otpEmail) return;
+  generatedOTP = generateOTP();
+  sendOTPEmail(otpEmail, generatedOTP);
+  document.getElementById("otp-status").textContent = "New OTP sent!";
+}
+
+// ===== Handle OTP Verification =====
+function handleOTPVerification(event) {
+  event.preventDefault();
+  const enteredOTP = document.getElementById("otp-input").value.trim();
+
+  if (enteredOTP === generatedOTP) {
+    showPopup("✅ OTP Verified Successfully!", "success");
+    flipTo("signin"); // Redirect to sign in page
+  } else {
+    showPopup("❌ Incorrect OTP. Please try again.", "error");
   }
 }
 

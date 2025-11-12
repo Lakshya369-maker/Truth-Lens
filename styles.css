@@ -2273,3 +2273,73 @@ textarea.fake-glow {
 .popup-box.error .popup-icon { color: #dc3545; }
 .popup-box.warning .popup-icon { color: #ffc107; }
 .popup-box.info .popup-icon { color: #007bff; }
+
+/* ===== OTP CARD ===== */
+.otp-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  color: #222;
+}
+
+.otp-card h2 {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.otp-instruction {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+#otp-form input {
+  width: 160px;
+  padding: 10px;
+  font-size: 18px;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  letter-spacing: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+#otp-form input:focus {
+  border-color: #000;
+}
+
+.otp-btn {
+  display: block;
+  margin: 18px auto 0;
+  padding: 10px 28px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.otp-btn:hover {
+  background: #222;
+  transform: scale(1.05);
+}
+
+.otp-resend-btn {
+  margin-top: 15px;
+  background: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.otp-resend-btn:hover {
+  color: #0056b3;
+}

@@ -8,6 +8,10 @@ import re
 import joblib
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import random
 
 # === Flask App Setup ===
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -196,6 +200,35 @@ def predict_news():
         print(f"❌ Prediction error: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
 
+# ========== OTP GENERATION & EMAIL SENDING ==========
+@app.route('/api/send-otp', methods=['POST'])
+def send_otp():
+    data = request.get_json()
+    email = data.get("email")
+    otp = str(random.randint(100000, 999999))
+
+    sender = "projects.planeta@gmail.com"
+    password = os.getenv("GMAIL_APP_PASSWORD")  # Use environment variable for security
+
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = sender
+        msg["To"] = email
+        msg["Subject"] = "Truth Lens OTP Verification"
+        msg.attach(MIMEText(f"Your OTP is: {otp}\n\nIt is valid for 5 minutes.", "plain"))
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender, password)
+        server.send_message(msg)
+        server.quit()
+
+        print(f"✅ OTP sent successfully to {email}")
+        return jsonify({"success": True, "message": "OTP sent successfully!"})
+
+    except Exception as e:
+        print("❌ OTP sending failed:", e)
+        return jsonify({"success": False, "error": str(e)})
 
 # === Run Server ===
 if __name__ == '__main__':

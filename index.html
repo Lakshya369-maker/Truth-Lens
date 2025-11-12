@@ -196,6 +196,25 @@
   </form>
 </div>
 
+<!-- ===== OTP Verification Card ===== -->
+<div class="flip-card otp-card">
+  <div class="card-content">
+    <h2>Verify OTP</h2>
+    <p class="otp-instruction">We've sent a 6-digit code to your registered email.</p>
+
+    <form id="otp-form" onsubmit="handleOTPVerification(event)">
+      <input type="text" id="otp-input" maxlength="6" placeholder="Enter OTP" required>
+      <button type="submit" class="otp-btn">Verify OTP</button>
+    </form>
+
+    <p id="otp-status" style="margin-top: 10px; font-size: 14px; color: #999;"></p>
+
+    <button id="resend-otp-btn" class="otp-resend-btn" onclick="resendOTP()">Resend OTP</button>
+
+    <button class="back-btn" onclick="flipTo('signup')">⬅ Back to Sign Up</button>
+  </div>
+</div>
+
 
   <!-- Back Side 1 (Fact Checking Tips) -->
   <div class="container back" id="fact-check-section">
