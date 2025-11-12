@@ -2046,3 +2046,40 @@ textarea.fake-glow {
     z-index: 99999;
   }
 }
+
+/* ===== Bouncing Dots Loader ===== */
+.news-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px auto;
+  height: 40px;
+  gap: 10px;
+}
+
+.news-loader .dot {
+  width: 10px;
+  height: 10px;
+  background-color: #000;
+  border-radius: 50%;
+  animation: bounceDots 1s infinite ease-in-out;
+}
+
+.news-loader .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+.news-loader .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.news-loader .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounceDots {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+}

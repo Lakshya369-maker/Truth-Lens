@@ -186,21 +186,27 @@ function switchForumTab(tabName) {
 }
 
 async function fetchLatestNews() {
+  const ul = document.getElementById("news-list");
+  const loader = document.getElementById("news-loader");
+
+  // Show loader initially
+  loader.style.display = "flex";
+  ul.style.display = "none";
+
   try {
     const response = await fetch(`${AUTH_API_URL}/news`);
-
     const data = await response.json();
 
     if (data.status !== "ok") {
       console.error("Error fetching news:", data);
+      loader.innerHTML = "<p style='color:red;'>⚠️ Failed to load news</p>";
       return;
     }
 
-    const ul = document.getElementById("news-list");
+    latestNewsTitles = [];
     ul.innerHTML = "";
 
-    latestNewsTitles = [];
-
+    // Limit to first 14 news only
     data.articles.slice(0, 14).forEach((article) => {
       if (article.title) {
         latestNewsTitles.push(article.title.trim().toLowerCase());
@@ -210,10 +216,17 @@ async function fetchLatestNews() {
       li.textContent = article.title;
       ul.appendChild(li);
     });
+
+    // Hide loader and show list
+    loader.style.display = "none";
+    ul.style.display = "block";
+
   } catch (error) {
     console.error("Fetch error:", error);
+    loader.innerHTML = "<p style='color:red;'>❌ Unable to connect to backend</p>";
   }
 }
+
 
 function flipTo(section) {
   // ⭐ Prevent flip while locked

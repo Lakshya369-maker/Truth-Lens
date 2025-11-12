@@ -709,9 +709,13 @@ The interface allows quick viewing of real-time verified news updates and compre
 
   <div class="right-news">
     <h3 style="color:#f94e4e; text-align:center; margin-bottom: 10px;"><u>Latest News</u></h3>
-    <ul class="news-list" id="news-list">
-      
-    </ul>
+    <div id="news-loader" class="news-loader">
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+<ul id="news-list" class="news-list" style="display:none;"></ul>
+
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
