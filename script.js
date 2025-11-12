@@ -206,7 +206,7 @@ async function fetchLatestNews(retryCount = 0) {
     latestNewsTitles = [];
     ul.innerHTML = "";
 
-    data.articles.slice(0, 14).forEach((article) => {
+    data.articles.forEach((article) => {
       if (article.title) {
         latestNewsTitles.push(article.title.trim().toLowerCase());
       }
@@ -332,10 +332,17 @@ function flipBack() {
   links.forEach((link) => link.classList.remove("active"));
 }
 
-function toggleTheme() {
+function toggleTheme(event) {
   const signedInUser = localStorage.getItem("signedInUser");
+
+  // 🔒 Not logged in → show toast instead of alert
   if (!signedInUser) {
-    alert("🔒 Please sign in to change theme!");
+    event?.stopPropagation();
+    const toggle = document.querySelector(".theme-toggle");
+    toggle.classList.add("locked");
+    setTimeout(() => toggle.classList.remove("locked"), 400);
+
+    showToast("🔒 Please sign in to use this feature!", "warning");
     return;
   }
 
@@ -362,6 +369,18 @@ function toggleTheme() {
     toggle.classList.remove("fire");
     createSnow();
   }
+}
+
+function showToast(message, type = "info") {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  toast.className = `toast show ${type}`;
+  toast.textContent = message;
+
+  setTimeout(() => {
+    toast.className = "toast"; // fade out
+  }, 3000);
 }
 
 function createSnow() {
@@ -980,4 +999,4 @@ document.querySelectorAll('.back-btn').forEach(btn => {
   }
 });
 
-setInterval(fetchLatestNews, 10000);
+setInterval(fetchLatestNews, 30000);

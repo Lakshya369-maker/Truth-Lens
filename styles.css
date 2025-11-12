@@ -223,14 +223,16 @@ button:hover {
 /* ✨ Bottom fade overlay */
 .right-news::after {
   content: "";
-  position: absolute;
+  position: sticky; /* ✅ keeps it fixed at the bottom of visible area */
   bottom: 0;
   left: 0;
+  display: block;
   width: 100%;
-  height: 60px; /* height of fade area */
+  height: 60px;
   background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-  pointer-events: none; /* let scrolling work normally */
+  pointer-events: none;
   border-radius: 0 0 14px 14px;
+  z-index: 10;
 }
 
 .news-ticker {
@@ -2117,4 +2119,57 @@ textarea.fake-glow {
 @keyframes loaderFade {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
+}
+
+/* 🔒 Small shake animation for blocked toggle */
+@keyframes shakeNo {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.theme-toggle.locked {
+  animation: shakeNo 0.3s ease;
+}
+
+/* ===== Toast Notification Styling ===== */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #181818;
+  color: #fff;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.4s ease, bottom 0.4s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.show {
+  opacity: 1;
+  bottom: 50px;
+}
+
+.toast.success {
+  background-color: #2e7d32;
+}
+
+.toast.error {
+  background-color: #c62828;
+}
+
+.toast.info {
+  background-color: #1976d2;
+}
+
+.toast.warning {
+  background-color: #f57c00;
 }
