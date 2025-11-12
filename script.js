@@ -21,11 +21,13 @@ async function checkNews() {
 
   if (!userInput) {
     showPopup("⚠️ Please enter a news headline or statement!", "warning");
+    return;
   }
 
   const wordCount = userInput.split(/\s+/).filter(w => w.length > 0).length;
   if (wordCount < 10) {
     showPopup("⚠️ Please enter at least 10 words.", "warning");
+    return;
   }
 
   resultTitle.textContent = "";
@@ -124,7 +126,7 @@ async function checkNews() {
 
   } catch (error) {
     console.error(error);
-    alert("❌ Error connecting to backend!");
+    showPopup("❌ Error connecting to backend!", "error");
     overlay.classList.add("hidden");
     document.body.style.pointerEvents = "auto";
   }
@@ -596,12 +598,12 @@ async function handleSignUp(event) {
   const password = document.getElementById('signup-password').value.trim();
 
   if (!username || !email || !password) {
-    alert('⚠️ Please fill all fields');
+    showPopup("⚠️ Please fill all fields", "warning");
     return;
   }
 
   if (password.length < 4) {
-    alert('⚠️ Password must be at least 4 characters');
+    showPopup("⚠️ Password must be at least 4 characters", "warning");
     return;
   }
 
@@ -613,25 +615,25 @@ async function handleSignUp(event) {
     });
 
     if (!response.ok) {
-      alert(`❌ Server error: ${response.status}`);
+      showPopup("❌ Server error. Please try again later.", "error");
       return;
     }
 
     const data = await response.json();
 
     if (data.success) {
-      alert('✅ Sign Up Successful!\n\nYour account has been created.\nNow you can sign in with your credentials.');
+      showPopup("✅ Sign Up Successful! You can now sign in.", "success");
       document.getElementById('signup-form').reset();
       
       setTimeout(() => {
         flipTo('signin');
       }, 800);
     } else {
-      alert(`❌ ${data.message}`);
+      showPopup(`❌ ${data.message}`,'error');
     }
   } catch (error) {
     console.error('Sign Up Error:', error);
-    alert('❌ Error: ' + error.message);
+    showPopup('❌ Error: ' + error.message,'error');
   }
 }
 
@@ -642,7 +644,7 @@ async function handleSignIn(event) {
   const password = document.getElementById('signin-password').value.trim();
 
   if (!username || !password) {
-    alert('⚠️ Please enter username and password');
+    showPopup('⚠️ Please enter username and password', 'warning');
     return;
   }
 
@@ -656,7 +658,7 @@ async function handleSignIn(event) {
     console.log('📥 SignIn Response status:', response.status);
 
     if (response.status === 401) {
-      alert('❌ You are not registered!\n\nPlease sign up.');
+      showPopup('❌ You are not registered! Please sign up.', 'error');
       document.getElementById('signin-form').reset();
       setTimeout(() => {
         flipTo('signup');  // Redirects to sign-up page
@@ -667,7 +669,7 @@ async function handleSignIn(event) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Response not OK. Status:', response.status, 'Body:', errorText);
-      alert(`❌ Server error: ${response.status}`);
+      showPopup(`❌ Server error: ${response.status}`, 'error');
       return;
     }
 
@@ -681,13 +683,13 @@ async function handleSignIn(event) {
       simulateSignIn(data.username);
       document.getElementById('signin-form').reset();
       flipBack();
-      alert(data.message);
+      showPopup(data.message, data.success ? 'success' : 'error');
     } else {
-      alert(`❌ ${data.message}`);
+      showPopup(`❌ ${data.message}`,'error');
     }
   } catch (error) {
     console.error('❌ SignIn Error:', error);
-    alert('❌ Error connecting to server: ' + error.message);
+    showPopup('❌ Error connecting to server: ' + error.message, 'error');
   }
 }
 
@@ -767,7 +769,7 @@ function simulateSignOut(auto = false) {
   localStorage.removeItem("authToken");
 
   if (auto) {
-    alert("⚠️ Session expired. You have been logged out.");
+    showPopup("🔒 Session expired. You’ve been logged out.", "info");
   }
 
   const historyBtn = document.getElementById('history-btn');
