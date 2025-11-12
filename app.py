@@ -201,34 +201,51 @@ def predict_news():
         return jsonify({"success": False, "message": str(e)}), 500
 
 # ========== OTP GENERATION & EMAIL SENDING ==========
-@app.route('/api/send-otp', methods=['POST'])
+@app.route("/api/send-otp", methods=["POST"])
 def send_otp():
     data = request.get_json()
-    email = data.get("email")
+    recipient_email = data.get("email")
+
+    if not recipient_email:
+        return jsonify({"success": False, "message": "Email is required"}), 400
+
+    # Generate OTP
+    import random
     otp = str(random.randint(100000, 999999))
 
-    sender = "projects.planeta@gmail.com"
-    password = os.getenv("GMAIL_APP_PASSWORD")  # Use environment variable for security
+    # Compose email
+    email_data = {
+        "from": "Truth Lens <onboarding@resend.dev>",  # test sender
+        "to": [recipient_email],
+        "subject": "Your Truth Lens OTP Code 🔐",
+        "html": f"""
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="color:#f94e4e;">Truth Lens Verification</h2>
+          <p>Your One-Time Password (OTP) is:</p>
+          <h1 style="letter-spacing: 5px;">{otp}</h1>
+          <p>This code will expire in 10 minutes.</p>
+          <br>
+          <p style="color:#555;">If you didn't request this, please ignore this email.</p>
+        </div>
+        """
+    }
 
+    # Send using Resend API
     try:
-        msg = MIMEMultipart()
-        msg["From"] = sender
-        msg["To"] = email
-        msg["Subject"] = "Truth Lens OTP Verification"
-        msg.attach(MIMEText(f"Your OTP is: {otp}\n\nIt is valid for 5 minutes.", "plain"))
-
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(sender, password)
-        server.send_message(msg)
-        server.quit()
-
-        print(f"✅ OTP sent successfully to {email}")
-        return jsonify({"success": True, "message": "OTP sent successfully!"})
-
+        headers = {
+            "Authorization": f"Bearer {os.getenv('RESEND_API_KEY')}",
+            "Content-Type": "application/json"
+        }
+        response = requests.post("https://api.resend.com/emails", headers=headers, json=email_data)
+        
+        if response.status_code == 200:
+            return jsonify({"success": True, "otp": otp})
+        else:
+            print("Resend API Error:", response.text)
+            return jsonify({"success": False, "message": "Failed to send email"}), 500
     except Exception as e:
-        print("❌ OTP sending failed:", e)
-        return jsonify({"success": False, "error": str(e)})
+        print("Error sending OTP:", e)
+        return jsonify({"success": False, "message": "Server error"}), 500
 
 # === Run Server ===
 if __name__ == '__main__':
