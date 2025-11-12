@@ -2343,3 +2343,17 @@ textarea.fake-glow {
 .otp-resend-btn:hover {
   color: #0056b3;
 }
+
+/* === OTP Flip State === */
+.flipped-otp #otp-section {
+  transform: rotateY(0deg);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#otp-section {
+  transform: rotateY(180deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.6s ease;
+}

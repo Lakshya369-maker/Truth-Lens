@@ -598,7 +598,7 @@ async function testBackendConnection() {
 
 async function handleSignUp(event) {
   event.preventDefault();
-  
+
   const username = document.getElementById('signup-username').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value.trim();
@@ -620,26 +620,34 @@ async function handleSignUp(event) {
       body: JSON.stringify({ username, email, password })
     });
 
-    if (!response.ok) {
-      showPopup("❌ Server error. Please try again later.", "error");
-      return;
-    }
-
     const data = await response.json();
 
+    // 🧠 Check if signup was successful and OTP is required
     if (data.success && data.message.includes("OTP")) {
       otpEmail = data.email;
-      generatedOTP = generateOTP();
-      sendOTPEmail(otpEmail, generatedOTP);
+
+      // Send OTP email via backend
+      showPopup("📧 Sending OTP to your email...", "info");
+      await sendOTPEmail(otpEmail);
+
+      // Flip to OTP verification card
       flipTo("otp");
+      showPopup("✅ Account created! Verify your email with OTP.", "success");
+
     } else if (data.success) {
-      showPopup("✅ Account created! Please verify via OTP.", "success");
+      // Fallback (just in case)
+      showPopup("✅ Account created! Please verify OTP.", "success");
+      otpEmail = data.email;
+      await sendOTPEmail(otpEmail);
       flipTo("otp");
+
     } else {
       showPopup(`❌ ${data.message}`, "error");
-    }}catch (error) {
-    console.error('Sign Up Error:', error);
-    showPopup('❌ Error: ' + error.message,'error');
+    }
+
+  } catch (error) {
+    console.error("❌ Sign Up Error:", error);
+    showPopup("❌ Server error: " + error.message, "error");
   }
 }
 
