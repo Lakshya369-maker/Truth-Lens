@@ -2135,7 +2135,7 @@ textarea.fake-glow {
 /* ===== Toast Notification Styling ===== */
 .toast {
   position: fixed;
-  bottom: 30px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #181818;
@@ -2143,33 +2143,42 @@ textarea.fake-glow {
   font-weight: 500;
   padding: 12px 24px;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
   z-index: 9999;
-  transition: opacity 0.4s ease, bottom 0.4s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .toast.show {
   opacity: 1;
-  bottom: 50px;
+  transform: translate(-50%, -10px); /* slides slightly upward */
 }
 
-.toast.success {
-  background-color: #2e7d32;
+.toast.success { background-color: #2e7d32; }
+.toast.error { background-color: #c62828; }
+.toast.info { background-color: #1976d2; }
+.toast.warning { background-color: #f57c00; }
+
+/* ===== Logout Button Styling ===== */
+.logout-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: transform 0.25s ease, filter 0.25s ease;
 }
 
-.toast.error {
-  background-color: #c62828;
+.logout-btn svg {
+  width: 26px;
+  height: 26px;
+  stroke: white;
+  transition: stroke 0.3s ease;
 }
 
-.toast.info {
-  background-color: #1976d2;
-}
-
-.toast.warning {
-  background-color: #f57c00;
+.logout-btn:hover svg {
+  stroke: #ff4b4b;
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6));
 }

@@ -156,13 +156,6 @@ function lockFlipState(isLocked) {
   }
 }
 
-function getSelectedLanguage() {
-  const langDropdown = document.getElementById("languageSelect");
-  if (langDropdown) {
-    return langDropdown.value.toLowerCase();
-  }
-  return "english";
-}
 // Community Forum Tab Switching
 function switchForumTab(tabName) {
   // Hide all tabs
@@ -373,15 +366,27 @@ function toggleTheme(event) {
 
 function showToast(message, type = "info") {
   const toast = document.getElementById("toast");
-  if (!toast) return;
+  if (!toast) {
+    console.warn("⚠️ Toast element not found in HTML");
+    return;
+  }
 
-  toast.className = `toast show ${type}`;
+  // Reset first
+  toast.className = `toast ${type}`;
   toast.textContent = message;
 
+  // Force reflow to restart animation
+  void toast.offsetWidth;
+
+  // Show toast
+  toast.classList.add("show");
+
+  // Hide after 3 seconds
   setTimeout(() => {
-    toast.className = "toast"; // fade out
+    toast.classList.remove("show");
   }, 3000);
 }
+
 
 function createSnow() {
   const snowEffect = document.getElementById("snow-effect");
@@ -703,6 +708,13 @@ function simulateSignIn(username) {
   const lockIcon = document.getElementById("lock-icon");
   if (lockIcon) lockIcon.style.opacity = "0";
 
+  const logoutBtn = document.getElementById("logout-btn");
+if (logoutBtn) {
+  logoutBtn.style.display = "inline-block";
+  logoutBtn.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400 });
+}
+
+
   setAutoLogoutTimers();
 }
 
@@ -742,13 +754,19 @@ function simulateSignOut(auto = false) {
   const lockIcon = document.getElementById("lock-icon");
   if (lockIcon) lockIcon.style.opacity = "1";
 
+  const logoutBtn = document.getElementById("logout-btn");
+if (logoutBtn) {
+  logoutBtn.style.display = "none";
+}
+
+
   console.log("🔒 User logged out.");
 }
 
 function setAutoLogoutTimers() {
   const signInTime = parseInt(localStorage.getItem("signInTime"));
   const elapsed = Date.now() - signInTime;
-  const totalSession = 2 * 60 * 1000;
+  const totalSession = 10 * 60 * 1000;
   const remaining = totalSession - elapsed;
 
   clearTimeout(window.warningTimer);
@@ -981,8 +999,11 @@ document.querySelectorAll('.back-btn').forEach(btn => {
   if (savedUser && signInTime) {
     const elapsed = Date.now() - parseInt(signInTime);
 
-    if (elapsed < 2 * 60 * 1000) {
+    if (elapsed < 10 * 60 * 1000) {
       simulateSignIn(savedUser);
+      const logoutBtn = document.getElementById("logout-btn");
+if (logoutBtn) logoutBtn.style.display = "inline-block";
+
     } else {
       simulateSignOut(true);
     }
