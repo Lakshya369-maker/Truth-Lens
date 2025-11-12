@@ -8,9 +8,6 @@ import re
 import joblib
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import random
 
 # === Flask App Setup ===
