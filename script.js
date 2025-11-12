@@ -201,7 +201,7 @@ async function fetchLatestNews() {
 
     latestNewsTitles = [];
 
-    data.articles.forEach((article) => {
+    data.articles.slice(0, 14).forEach((article) => {
       if (article.title) {
         latestNewsTitles.push(article.title.trim().toLowerCase());
       }
