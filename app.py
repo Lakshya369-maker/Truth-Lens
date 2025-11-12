@@ -213,42 +213,40 @@ def send_otp():
     if not recipient_email:
         return jsonify({"success": False, "message": "Email is required"}), 400
 
-    # Generate OTP
-    import random
     otp = str(random.randint(100000, 999999))
 
-    # Compose email
     email_data = {
-        "from": "Truth Lens <onboarding@resend.dev>",  # test sender
-        "to": [recipient_email],
+        "sender": {"name": "Truth Lens", "email": "lakshya.arora.900@gmail.com"},
+        "to": [{"email": recipient_email}],
         "subject": "Your Truth Lens OTP Code 🔐",
-        "html": f"""
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="color:#f94e4e;">Truth Lens Verification</h2>
+        "htmlContent": f"""
+        <div style='font-family: Arial, sans-serif; padding: 20px;'>
+          <h2 style='color:#f94e4e;'>Truth Lens Verification</h2>
           <p>Your One-Time Password (OTP) is:</p>
-          <h1 style="letter-spacing: 5px;">{otp}</h1>
+          <h1 style='letter-spacing: 5px;'>{otp}</h1>
           <p>This code will expire in 10 minutes.</p>
           <br>
-          <p style="color:#555;">If you didn't request this, please ignore this email.</p>
+          <p style='color:#555;'>If you didn't request this, please ignore this email.</p>
         </div>
         """
     }
 
-    # Send using Resend API
     try:
         headers = {
-            "Authorization": f"Bearer {os.getenv('RESEND_API_KEY')}",
-            "Content-Type": "application/json"
+            "accept": "application/json",
+            "api-key": os.getenv("BREVO_API_KEY"),
+            "content-type": "application/json"
         }
-        response = requests.post("https://api.resend.com/emails", headers=headers, json=email_data)
-        
-        if response.status_code == 200:
+        response = requests.post("https://api.brevo.com/v3/smtp/email", headers=headers, json=email_data)
+
+        if response.status_code in [200, 201]:
+            print("✅ OTP sent successfully via Brevo")
             return jsonify({"success": True, "otp": otp})
         else:
-            print("Resend API Error:", response.text)
+            print("❌ Brevo API Error:", response.text)
             return jsonify({"success": False, "message": "Failed to send email"}), 500
     except Exception as e:
-        print("Error sending OTP:", e)
+        print("❌ Error sending OTP:", str(e))
         return jsonify({"success": False, "message": "Server error"}), 500
 
 # === Run Server ===
