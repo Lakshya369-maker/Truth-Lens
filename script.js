@@ -600,6 +600,7 @@ async function testBackendConnection() {
 
 async function handleSignUp(event) {
   event.preventDefault();
+  event.stopPropagation();
 
   const username = document.getElementById('signup-username').value.trim();
   const email = document.getElementById('signup-email').value.trim();
@@ -635,6 +636,7 @@ async function handleSignUp(event) {
     showPopup("📧 Sending OTP to your email...", "info");
     await sendOTPEmail(otpEmail);
 
+    lockFlipState(false); 
     flipTo("otp");
     showPopup("✅ Account created! Verify your email with OTP.", "success");
 
