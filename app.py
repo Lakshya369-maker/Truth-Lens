@@ -231,36 +231,49 @@ def send_otp():
     expiry = int(time.time()) + OTP_TTL_SECONDS
     otp_store[recipient_email] = {'otp': otp, 'expires_at': expiry}
 
-    # DEV MODE → return OTP
+    # DEV MODE → return OTP immediately (handy for local dev)
     if os.getenv("DEV_RETURN_OTP", "false").lower() == "true":
+        print(f"[DEV_RETURN_OTP] OTP for {recipient_email}: {otp}")
         return jsonify({"success": True, "otp": otp}), 200
 
+    # Ensure BREVO API key exists
+    brevo_key = os.getenv("BREVO_API_KEY")
+    if not brevo_key:
+        print("❌ BREVO_API_KEY missing in environment")
+        return jsonify({"success": False, "message": "Server misconfigured: BREVO_API_KEY missing"}), 500
 
-    # PRODUCTION — send email using Brevo
     headers = {
         "accept": "application/json",
-        "api-key": os.getenv("BREVO_API_KEY"),
+        "api-key": brevo_key,
         "content-type": "application/json"
     }
 
     email_data = {
-        "sender": {"name": "Truth Lens", "email": "lakshya.arora.900@gmail.com"},
+        "sender": {"name": "Truth Lens", "email": "lakshya.arora.900@gmail.com"},  # must be verified
         "to": [{"email": recipient_email}],
         "subject": "Your OTP code",
-        "htmlContent": f"<h2>Your OTP is: {otp}</h2>"
+        "htmlContent": f"<h2>Your OTP is: <b>{otp}</b></h2><p>This code expires in 10 minutes.</p>"
     }
 
-    response = requests.post(
-        "https://api.brevo.com/v3/smtp/email",
-        headers=headers,
-        json=email_data
-    )
+    try:
+        resp = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers=headers,
+            json=email_data,
+            timeout=15
+        )
+    except Exception as ex:
+        print("❌ Exception sending to Brevo:", str(ex))
+        return jsonify({"success": False, "message": "Exception when contacting Brevo: " + str(ex)}), 500
 
-    if response.status_code in [200, 201]:
+    # log Brevo response for debugging
+    print(f"Brevo status: {resp.status_code} | body: {resp.text}")
+
+    if resp.status_code in (200, 201, 202):
         return jsonify({"success": True, "message": "OTP sent"}), 200
     else:
-        return jsonify({"success": False, "message": "Failed to send OTP"}), 500
-
+        # include Brevo body so you can see the exact error in the frontend dev console
+        return jsonify({"success": False, "message": "Failed to send OTP", "brevo_status": resp.status_code, "brevo_body": resp.text}), 500
 
 
 @app.route('/api/verify-otp', methods=['POST'])

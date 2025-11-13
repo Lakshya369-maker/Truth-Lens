@@ -2420,7 +2420,7 @@ textarea.fake-glow {
 .otp-resend-link {
     color: #4da3ff;
     cursor: pointer;
-    margin-top: 6px; 
+    margin-top: 12px; 
     font-size: 14px;
     text-decoration: underline;
 }
