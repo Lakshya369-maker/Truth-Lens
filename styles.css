@@ -2357,3 +2357,11 @@ textarea.fake-glow {
   pointer-events: none;
   transition: all 0.6s ease;
 }
+
+/* OTP Flip Animation */
+.flip-container.flipped-otp .front {
+    transform: rotateY(-180deg);
+}
+.flip-container.flipped-otp #otp-section {
+    transform: rotateY(0deg);
+}
