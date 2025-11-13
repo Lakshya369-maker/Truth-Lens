@@ -230,9 +230,10 @@ async function fetchLatestNews(retryCount = 0) {
 
 function flipTo(section) {
   // ⭐ Prevent flip while locked
-  if (window.lockFlip && section !== "news-result") {
-    console.log("⛔ FLIP BLOCKED: Flip is locked. Cannot navigate to:", section);
-    return;
+// Allow NEWS-RESULT & OTP even when locked
+  if (window.lockFlip && !["news-result", "otp"].includes(section)) {
+      console.log("⛔ Flip blocked:", section);
+      return;
   }
 
   const flipContainer = document.getElementById("flip-container");
@@ -1031,11 +1032,10 @@ document.addEventListener("DOMContentLoaded", () => {
 document.querySelectorAll('.back-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    console.log("Back button clicked. lockFlip =", window.lockFlip);
-    flipBack(); // ✅ This should ALWAYS work
-  }, true);
+    flipBack(); // no stopPropagation
+  });
 });
+
 
   // ⭐ REMOVE inline onclick from history button - use event listener only
   const historyBtn = document.getElementById('history-btn');
@@ -1056,7 +1056,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
       
       console.log("History button clicked");
       flipTo('history');
-    }, true);
+    });
   }
 
   // Bind sidebar links
@@ -1075,7 +1075,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
             flipTo(match[1]);
           }
         }
-      }, true);
+      });
     }
   });
 
@@ -1087,7 +1087,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
       e.preventDefault();
       e.stopPropagation();
       flipTo("signup");
-    }, true);
+    });
   }
 
   // Bind back-to-signin link
@@ -1098,7 +1098,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
       e.preventDefault();
       e.stopPropagation();
       flipTo("signin");
-    }, true);
+    });
   }
 
   fetchLatestNews();
@@ -1132,7 +1132,7 @@ if (logoutBtn) logoutBtn.style.display = "inline-block";
       e.preventDefault();
       e.stopPropagation();
       document.getElementById('history-panel').style.display = 'none';
-    }, true);
+    });
   }
 });
 
