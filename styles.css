@@ -2365,3 +2365,17 @@ textarea.fake-glow {
 .flip-container.flipped-otp #otp-section {
     transform: rotateY(0deg);
 }
+
+/* Resend OTP link */
+.otp-resend-link {
+  font-size: 0.95rem;
+  color: #007bff;
+  cursor: pointer;
+  margin-left: 12px;
+  text-decoration: underline;
+  display: inline-block;
+}
+
+.otp-resend-link:hover {
+  color: #0056b3;
+}

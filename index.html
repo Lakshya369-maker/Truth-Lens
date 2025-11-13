@@ -204,13 +204,12 @@
   <form id="otp-form" onsubmit="handleOTPVerification(event)">
     <input type="text" id="otp-input" maxlength="6" placeholder="Enter OTP" required>
     <button type="submit" class="otp-btn">Verify OTP</button>
+    <span id="resend-otp-btn" class="otp-resend-link" onclick="resendOTP()">Resend OTP</span>
   </form>
 
   <p id="otp-status" style="margin-top: 10px; font-size: 14px; color: #999;"></p>
 
-  <button id="resend-otp-btn" class="otp-resend-btn" onclick="resendOTP()">Resend OTP</button>
-
-  <button class="back-btn back-otp-btn" onclick="flipTo('signup')">⬅ Back to Sign Up</button>
+  <button class="back-btn back-otp-btn" onclick="flipTo('signup')">✖</button>
 </div>
 
 
