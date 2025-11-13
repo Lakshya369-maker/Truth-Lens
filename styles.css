@@ -2369,18 +2369,19 @@ textarea.fake-glow {
 /* Resend OTP link */
 /* OTP input full width */
 .otp-box-container {
-    background: #1a1a1a;
+    background: white;
     padding: 20px;
     border-radius: 14px;
     width: 260px;
     margin: 0 auto 15px auto;
+    border: 2px dashed black;
 }
 
 /* 6-digit wrapper */
 .otp-input-wrapper {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
 }
 
 /* Individual OTP digits */
@@ -2391,10 +2392,10 @@ textarea.fake-glow {
     font-size: 24px;
     font-weight: bold;
     border: none;
-    border-bottom: 3px solid #888;
+    border-bottom: 3px solid #111;
     background: transparent;
     outline: none;
-    color: white;
+    color: black;
 }
 
 /* Verify + Resend layout */
@@ -2408,7 +2409,7 @@ textarea.fake-glow {
 
 .otp-btn {
     padding: 10px 20px;
-    background: #ff4d4d;
+    background: #111;
     color: white;
     border: none;
     border-radius: 6px;
@@ -2418,6 +2419,7 @@ textarea.fake-glow {
 .otp-resend-link {
     color: #4da3ff;
     cursor: pointer;
+    align-items: center;
     font-size: 14px;
     text-decoration: underline;
 }
