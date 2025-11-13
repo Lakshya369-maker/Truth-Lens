@@ -2372,6 +2372,7 @@ textarea.fake-glow {
   color: #007bff;
   cursor: pointer;
   margin-left: 12px;
+  margin-top:30px;
   text-decoration: underline;
   display: inline-block;
 }
