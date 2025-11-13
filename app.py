@@ -249,6 +249,20 @@ def send_otp():
         print("❌ Error sending OTP:", str(e))
         return jsonify({"success": False, "message": "Server error"}), 500
 
+@app.route('/api/reset-db', methods=['GET'])
+def reset_database():
+    import sqlite3, os
+    db_path = "users.db"
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("DELETE FROM users;")
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True, "message": "✅ All user data deleted."})
+    else:
+        return jsonify({"success": False, "message": "❌ Database not found."})
+
 # === Run Server ===
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
