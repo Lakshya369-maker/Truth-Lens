@@ -201,13 +201,19 @@
   <h2>Verify OTP</h2>
   <p class="otp-instruction">We've sent a 6-digit code to your registered email.</p>
 
- <form id="otp-form" onsubmit="handleOTPVerification(event)" class="otp-row">
+<div id="otp-box">
+    
+    <!-- Row 1: Full-width OTP Field -->
     <input type="text" id="otp-input" maxlength="6" placeholder="Enter OTP" required>
 
-    <button type="submit" class="otp-btn">Verify OTP</button>
+    <!-- Row 2: Verify Button + Resend Link -->
+    <div class="otp-actions">
+        <button type="submit" class="otp-btn" onclick="handleOTPVerification(event)">Verify OTP</button>
+        <span class="otp-resend-link" onclick="resendOTP()">Resend OTP</span>
+    </div>
 
-    <span id="resend-otp-btn" class="otp-resend-link" onclick="resendOTP()">Resend OTP</span>
-</form>
+</div>
+
 
 
   <p id="otp-status" style="margin-top: 10px; font-size: 14px; color: #999;"></p>
