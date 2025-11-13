@@ -249,7 +249,7 @@ def send_otp():
     }
 
     email_data = {
-        "sender": {"name": "Truth Lens", "email": "lakshya.arora.900@gmail.com"},  # must be verified
+        "sender": {"name": "Truth Lens", "email": "projects.planeta@gmail.com"},  # must be verified
         "to": [{"email": recipient_email}],
         "subject": "Your OTP code",
         "htmlContent": f"<h2>Your OTP is: <b>{otp}</b></h2><p>This code expires in 10 minutes.</p>"
