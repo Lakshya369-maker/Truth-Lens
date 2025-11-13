@@ -123,6 +123,13 @@ def delete_history_item(history_id: int) -> bool:
     finally:
         conn.close()
 
+def get_user_by_email(email):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = c.fetchone()
+    conn.close()
+    return user
 
 
 # Optional quick tests when running this file directly

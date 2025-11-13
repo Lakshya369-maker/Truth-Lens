@@ -322,7 +322,8 @@ function flipBack() {
     "flipped-community",
     "flipped-faqs",
     "flipped-privacy",
-    "flipped-contact"
+    "flipped-contact",
+    "flipped-otp"
   );
 
   console.log("✅ Flipped back to main");
@@ -615,41 +616,33 @@ async function handleSignUp(event) {
 
   try {
     const response = await fetch(`${AUTH_API_URL}/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password })
     });
 
     const data = await response.json();
 
-    // 🧠 Check if signup was successful and OTP is required
-    if (data.success && data.message.includes("OTP")) {
-      otpEmail = data.email;
-
-      // Send OTP email via backend
-      showPopup("📧 Sending OTP to your email...", "info");
-      await sendOTPEmail(otpEmail);
-
-      // Flip to OTP verification card
-      flipTo("otp");
-      showPopup("✅ Account created! Verify your email with OTP.", "success");
-
-    } else if (data.success) {
-      // Fallback (just in case)
-      showPopup("✅ Account created! Please verify OTP.", "success");
-      otpEmail = data.email;
-      await sendOTPEmail(otpEmail);
-      flipTo("otp");
-
-    } else {
+    if (!data.success) {
       showPopup(`❌ ${data.message}`, "error");
+      return;
     }
 
-  } catch (error) {
-    console.error("❌ Sign Up Error:", error);
-    showPopup("❌ Server error: " + error.message, "error");
+    // SUCCESS → Always proceed to OTP
+    otpEmail = data.email;
+
+    showPopup("📧 Sending OTP to your email...", "info");
+    await sendOTPEmail(otpEmail);
+
+    flipTo("otp");
+    showPopup("✅ Account created! Verify your email with OTP.", "success");
+
+  } catch (err) {
+    console.error("❌ Sign Up Error:", err);
+    showPopup("❌ Server error: " + err.message, "error");
   }
 }
+
 
 let generatedOTP = null;
 let otpEmail = null;
@@ -687,22 +680,42 @@ async function sendOTPEmail(email) {
 function resendOTP() {
   if (!otpEmail) return;
   generatedOTP = generateOTP();
-  sendOTPEmail(otpEmail, generatedOTP);
+  sendOTPEmail(otpEmail);
   document.getElementById("otp-status").textContent = "New OTP sent!";
 }
 
 // ===== Handle OTP Verification =====
-function handleOTPVerification(event) {
+async function handleOTPVerification(event) {
   event.preventDefault();
+
   const enteredOTP = document.getElementById("otp-input").value.trim();
 
-  if (enteredOTP === generatedOTP) {
-    showPopup("✅ OTP Verified Successfully!", "success");
-    flipTo("signin"); // Redirect to sign in page
-  } else {
-    showPopup("❌ Incorrect OTP. Please try again.", "error");
+  if (!otpEmail) {
+    showPopup("❌ Email missing for OTP verification", "error");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${AUTH_API_URL}/verify-otp`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: otpEmail, otp: enteredOTP })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showPopup("✅ OTP Verified Successfully!", "success");
+      flipTo("signin");
+    } else {
+      showPopup(`❌ ${data.message}`, "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showPopup("❌ Server error during OTP verification.", "error");
   }
 }
+
 
 async function handleSignIn(event) {
   event.preventDefault();

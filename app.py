@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from db_operations import add_user, get_user, authenticate, save_news_check, get_news_history, delete_history_item
+from db_operations import add_user, get_user, authenticate, save_news_check, get_news_history, delete_history_item, get_user_by_email
 from database import create_table
 import os
 import requests
@@ -9,6 +9,14 @@ import joblib
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 import random
+import time
+
+
+# temporary in-memory stores (for dev only)
+pending_users = {}   # email -> {username, email, password}
+otp_store = {}       # email -> {otp, expires_at_timestamp}
+
+OTP_TTL_SECONDS = 10 * 60  # 10 minutes
 
 # === Flask App Setup ===
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -45,36 +53,39 @@ def health():
     return jsonify({'status': 'Backend is running', 'message': 'Connected'}), 200
 
 
-# Sign Up Route
+# ========== SIGNUP ==========
+
 @app.route('/api/signup', methods=['POST'])
 def signup():
-    try:
-        data = request.get_json()
-        username = data.get('username', '').strip()
-        email = data.get('email', '').strip()
-        password = data.get('password', '').strip()
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
 
-        if not username or not email or not password:
-            return jsonify({'success': False, 'message': 'All fields are required'}), 400
+    if not username or not email or not password:
+        return jsonify({'success': False, 'message': 'All fields are required'}), 400
+    
+    if len(password) < 4:
+        return jsonify({'success': False, 'message': 'Password must be at least 4 characters'}), 400
 
-        if len(password) < 4:
-            return jsonify({'success': False, 'message': 'Password must be at least 4 characters'}), 400
+    # check duplicate username
+    if get_user(username):
+        return jsonify({'success': False, 'message': 'Username already exists'}), 400
 
-        # Save user (if not already exists)
-        user_added = add_user(username, email, password)
-        if user_added:
-            # Instead of telling user to sign in, tell frontend to verify OTP
-            return jsonify({
-                'success': True,
-                'message': 'OTP verification required',
-                'email': email
-            }), 201
-        else:
-            return jsonify({'success': False, 'message': 'Username or email already exists'}), 400
+    if get_user_by_email(email):
+        return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
-    except Exception as e:
-        print(f"❌ Signup error: {str(e)}")
-        return jsonify({'success': False, 'message': 'Server error: ' + str(e)}), 500
+    pending_users[email] = {
+        "username": username,
+        "email": email,
+        "password": password
+    }
+
+    return jsonify({
+        'success': True,
+        'message': 'OTP verification required',
+        'email': email
+    }), 200
 
 
 # Sign In Route
@@ -205,63 +216,108 @@ def predict_news():
         return jsonify({"success": False, "message": str(e)}), 500
 
 # ========== OTP GENERATION & EMAIL SENDING ==========
-@app.route("/api/send-otp", methods=["POST"])
+@app.route('/api/send-otp', methods=['POST'])
 def send_otp():
     data = request.get_json()
-    recipient_email = data.get("email")
+    recipient_email = data.get('email')
 
     if not recipient_email:
-        return jsonify({"success": False, "message": "Email is required"}), 400
+        return jsonify({"success": False, "message": "Email required"}), 400
+
+    if recipient_email not in pending_users:
+        return jsonify({"success": False, "message": "No pending signup for this email"}), 400
 
     otp = str(random.randint(100000, 999999))
+    expiry = int(time.time()) + OTP_TTL_SECONDS
+    otp_store[recipient_email] = {'otp': otp, 'expires_at': expiry}
+
+    # DEV MODE → return OTP
+    if os.getenv("DEV_RETURN_OTP", "false").lower() == "true":
+        return jsonify({"success": True, "otp": otp}), 200
+
+
+    # PRODUCTION — send email using Brevo
+    headers = {
+        "accept": "application/json",
+        "api-key": os.getenv("BREVO_API_KEY"),
+        "content-type": "application/json"
+    }
 
     email_data = {
         "sender": {"name": "Truth Lens", "email": "lakshya.arora.900@gmail.com"},
         "to": [{"email": recipient_email}],
-        "subject": "Your Truth Lens OTP Code 🔐",
-        "htmlContent": f"""
-        <div style='font-family: Arial, sans-serif; padding: 20px;'>
-          <h2 style='color:#f94e4e;'>Truth Lens Verification</h2>
-          <p>Your One-Time Password (OTP) is:</p>
-          <h1 style='letter-spacing: 5px;'>{otp}</h1>
-          <p>This code will expire in 10 minutes.</p>
-          <br>
-          <p style='color:#555;'>If you didn't request this, please ignore this email.</p>
-        </div>
-        """
+        "subject": "Your OTP code",
+        "htmlContent": f"<h2>Your OTP is: {otp}</h2>"
     }
 
-    try:
-        headers = {
-            "accept": "application/json",
-            "api-key": os.getenv("BREVO_API_KEY"),
-            "content-type": "application/json"
-        }
-        response = requests.post("https://api.brevo.com/v3/smtp/email", headers=headers, json=email_data)
+    response = requests.post(
+        "https://api.brevo.com/v3/smtp/email",
+        headers=headers,
+        json=email_data
+    )
 
-        if response.status_code in [200, 201]:
-            print("✅ OTP sent successfully via Brevo")
-            return jsonify({"success": True, "otp": otp})
-        else:
-            print("❌ Brevo API Error:", response.text)
-            return jsonify({"success": False, "message": "Failed to send email"}), 500
-    except Exception as e:
-        print("❌ Error sending OTP:", str(e))
-        return jsonify({"success": False, "message": "Server error"}), 500
+    if response.status_code in [200, 201]:
+        return jsonify({"success": True, "message": "OTP sent"}), 200
+    else:
+        return jsonify({"success": False, "message": "Failed to send OTP"}), 500
 
-@app.route('/api/reset-db', methods=['GET'])
+
+
+@app.route('/api/verify-otp', methods=['POST'])
+def verify_otp():
+    data = request.get_json()
+    email = data.get('email')
+    entered = data.get('otp')  # otp typed by user
+
+    if not email or not entered:
+        return jsonify({"success": False, "message": "Email and OTP required"}), 400
+
+    rec = otp_store.get(email)
+    if not rec:
+        return jsonify({"success": False, "message": "OTP not found or expired"}), 400
+
+    if int(time.time()) > rec['expires_at']:
+        del otp_store[email]
+        return jsonify({"success": False, "message": "OTP expired"}), 400
+
+    if entered != rec['otp']:
+        return jsonify({"success": False, "message": "Invalid OTP"}), 400
+
+    # OTP correct → finalize registration
+    user = pending_users.get(email)
+    if not user:
+        return jsonify({"success": False, "message": "Pending signup not found"}), 400
+
+    added = add_user(user["username"], user["email"], user["password"])
+    if not added:
+        return jsonify({"success": False, "message": "Failed to add user to DB"}), 500
+
+    # cleanup
+    del pending_users[email]
+    del otp_store[email]
+
+    return jsonify({"success": True, "message": "Account verified and created", "username": user["username"]}), 200
+
+
+@app.route('/api/reset-db', methods=['POST'])
 def reset_database():
     import sqlite3, os
     db_path = "users.db"
     if os.path.exists(db_path):
-        conn = sqlite3.connect(db_path)
-        c = conn.cursor()
-        c.execute("DELETE FROM users;")
-        conn.commit()
-        conn.close()
-        return jsonify({"success": True, "message": "✅ All user data deleted."})
+        try:
+            conn = sqlite3.connect(db_path)
+            c = conn.cursor()
+            # Remove history first to avoid FK issues (if any)
+            c.execute("DELETE FROM news_history;")
+            c.execute("DELETE FROM users;")
+            conn.commit()
+            conn.close()
+            return jsonify({"success": True, "message": "✅ All user and history data deleted."})
+        except Exception as e:
+            return jsonify({"success": False, "message": "❌ Error resetting DB: " + str(e)}), 500
     else:
-        return jsonify({"success": False, "message": "❌ Database not found."})
+        return jsonify({"success": False, "message": "❌ Database not found."}), 404
+
 
 # === Run Server ===
 if __name__ == '__main__':
