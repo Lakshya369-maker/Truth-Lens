@@ -627,6 +627,8 @@ async function handleSignUp(event) {
 
     if (!data.success) {
       showPopup(`❌ ${data.message}`, "error");
+        otpInputs.forEach(i => i.value = "");
+        otpInputs[0].focus();
       return;
     }
 
@@ -637,6 +639,11 @@ async function handleSignUp(event) {
     await sendOTPEmail(otpEmail);
 
     lockFlipState(false); 
+    clearInterval(otpTimer);
+timeLeft = 30;
+document.getElementById("resend-otp").textContent = "Resend OTP";
+document.getElementById("resend-otp").classList.remove("disabled");
+
     flipTo("otp");
     showPopup("✅ Account created! Verify your email with OTP.", "success");
 
@@ -646,14 +653,13 @@ async function handleSignUp(event) {
   }
 }
 
-
-let generatedOTP = null;
-let otpEmail = null;
-
 // ===== Generate 6-digit OTP =====
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+let generatedOTP = null;
+let otpEmail = null;
 
 // ===== Send OTP via EmailJS =====
 async function sendOTPEmail(email) {
@@ -679,20 +685,52 @@ async function sendOTPEmail(email) {
 }
 
 
-// ===== Resend OTP =====
+let otpTimer = null;
+let timeLeft = 30;
+
 function resendOTP() {
-  if (!otpEmail) return;
-  generatedOTP = generateOTP();
-  sendOTPEmail(otpEmail);
-  document.getElementById("otp-status").textContent = "New OTP sent!";
+  const resendLink = document.getElementById("resend-otp");
+
+  if (resendLink.classList.contains("disabled")) return;
+
+  // SEND OTP AGAIN
+  if (otpEmail) {
+    generatedOTP = generateOTP();
+    sendOTPEmail(otpEmail);
+    document.getElementById("otp-status").textContent = "New OTP sent!";
+  }
+
+  // START TIMER
+  resendLink.classList.add("disabled");
+  resendLink.textContent = `Resend in ${timeLeft}s`;
+
+  otpTimer = setInterval(() => {
+      timeLeft -= 1;
+      resendLink.textContent = `Resend in ${timeLeft}s`;
+
+      if (timeLeft === 0) {
+          clearInterval(otpTimer);
+          timeLeft = 30;
+          resendLink.classList.remove("disabled");
+          resendLink.textContent = "Resend OTP";
+      }
+  }, 1000);
 }
+
 
 // ===== Handle OTP Verification =====
 async function handleOTPVerification(event) {
   event.preventDefault();
 
-  const enteredOTP = document.getElementById("otp-input").value.trim();
+  const otp = getEnteredOTP();
 
+  if (otp.length !== 6) {
+    showPopup("Please enter all 6 digits.", "error");
+    return;
+  }
+
+    console.log("Entered OTP:", otp);
+  
   if (!otpEmail) {
     showPopup("❌ Email missing for OTP verification", "error");
     return;
@@ -702,7 +740,8 @@ async function handleOTPVerification(event) {
     const response = await fetch(`${AUTH_API_URL}/verify-otp`, {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: otpEmail, otp: enteredOTP })
+      body: JSON.stringify({ email: otpEmail, otp })
+
     });
 
     const data = await response.json();
@@ -1025,8 +1064,26 @@ async function saveNewsCheckToHistory(headline, result) {
   }
 }
 
+let otpInputs;
 // ========== MAIN INITIALIZATION ==========
 document.addEventListener("DOMContentLoaded", () => {
+  // Auto move, backspace & OTP join
+otpInputs = document.querySelectorAll(".otp-digit");
+
+otpInputs.forEach((input, index) => {
+    input.addEventListener("input", () => {
+        if (input.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+        }
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && input.value === "" && index > 0) {
+            otpInputs[index - 1].focus();
+        }
+    });
+});
+
   window.lockFlip = false;
   console.log("✅ Flip lock initialized");
   
@@ -1137,5 +1194,8 @@ if (logoutBtn) logoutBtn.style.display = "inline-block";
     });
   }
 });
+function getEnteredOTP() {
+    return Array.from(otpInputs).map(i => i.value).join("");
+}
 
 setInterval(fetchLatestNews, 30000);

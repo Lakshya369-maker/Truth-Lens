@@ -197,30 +197,34 @@
 </div>
 
 <!-- ===== OTP Verification Section ===== -->
+<!-- ===== OTP Verification Section ===== -->
 <div class="container back" id="otp-section">
   <h2>Verify OTP</h2>
-  <p class="otp-instruction">We've sent a 6-digit code to your registered email.</p>
+  <p class="otp-instruction">We’ve sent a 6-digit code to your registered email.</p>
 
-<div id="otp-box">
-    
-    <!-- Row 1: Full-width OTP Field -->
-    <input type="text" id="otp-input" maxlength="6" placeholder="Enter OTP" required>
-
-    <!-- Row 2: Verify Button + Resend Link -->
-    <div class="otp-actions">
-        <button type="submit" class="otp-btn" onclick="handleOTPVerification(event)">Verify OTP</button>
-        <span class="otp-resend-link" onclick="resendOTP()">Resend OTP</span>
+  <div class="otp-box-container">
+    <div class="otp-input-wrapper">
+      <input type="text" maxlength="1" class="otp-digit" />
+      <input type="text" maxlength="1" class="otp-digit" />
+      <input type="text" maxlength="1" class="otp-digit" />
+      <input type="text" maxlength="1" class="otp-digit" />
+      <input type="text" maxlength="1" class="otp-digit" />
+      <input type="text" maxlength="1" class="otp-digit" />
     </div>
+  </div>
 
-</div>
+  <div class="otp-actions">
+    <button class="otp-btn" onclick="handleOTPVerification(event)">Verify OTP</button>
 
+    <span class="otp-resend-link" id="resend-otp" onclick="resendOTP()">
+      Resend OTP
+    </span>
+  </div>
 
-
-  <p id="otp-status" style="margin-top: 10px; font-size: 14px; color: #999;"></p>
+  <p id="otp-status" class="otp-status"></p>
 
   <button class="back-btn back-otp-btn" onclick="flipTo('signup')">✖</button>
 </div>
-
 
   <!-- Back Side 1 (Fact Checking Tips) -->
   <div class="container back" id="fact-check-section">
