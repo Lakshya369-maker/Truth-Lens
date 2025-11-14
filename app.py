@@ -10,9 +10,7 @@ from pathlib import Path
 from sentence_transformers import SentenceTransformer
 import random
 import time
-import fasttext
-
-
+from langdetect import detect
 
 # temporary in-memory stores (for dev only)
 pending_users = {}   # email -> {username, email, password}
@@ -32,44 +30,22 @@ CORS(app, origins=[
 create_table()
 print("✅ Database initialized")
 
-# === Load ALL Models (English + Hindi) ===
+# === Load Multilingual Model ===
 BASE_DIR = Path(__file__).resolve().parent         # -> E:/Minor Project
 MODELS_DIR = BASE_DIR / "models"                   # -> E:/Minor Project/models
 
 print("📁 Loading models from:", MODELS_DIR)
 
-# --- Language Detector ---
-print("🔤 Loading language detection model...")
-lid_model = fasttext.load_model(str(MODELS_DIR / "lid.176.bin"))
+print("🌍 Loading multilingual encoder...")
+encoder = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 
-# --- English Model ---
-print("🇬🇧 Loading English model...")
-en_encoder = SentenceTransformer(str(MODELS_DIR / "english_sentence_encoder"))
-en_clf = joblib.load(str(MODELS_DIR / "english_semantic_clf.joblib"))
+print("🧠 Loading multilingual classifier...")
+clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
 
-# --- Hindi Model ---
-print("🇮🇳 Loading Hindi model...")
-hi_encoder = SentenceTransformer(str(MODELS_DIR / "hindi_embedding_model"))
-hi_clf = joblib.load(str(MODELS_DIR / "hindi_semantic_clf.joblib"))
+print("✅ Multilingual model loaded successfully!")
+
 
 print("✅ All Models Loaded Successfully!")
-
-
-# === Text Cleaning Function ===
-# For English model only
-def clean_text(text):
-    text = text.lower()
-    text = re.sub(r"http\S+", "", text)
-    # keep hindi characters safe
-    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
-
-def detect_language(text):
-    label, prob = lid_model.predict(text, k=1)
-    lang = label[0].replace("__label__", "")
-    return lang
 
 # ============ ROUTES ============
 
@@ -217,7 +193,6 @@ def get_news():
     response = requests.get(url)
     return jsonify(response.json())
 
-
 # === Transformer-based Fake News Prediction ===
 @app.route('/api/predict', methods=['POST'])
 def predict_news():
@@ -228,64 +203,46 @@ def predict_news():
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
 
-        # --- Detect Language ---
-        lang = detect_language(text)
-        print(f"🌐 Detected Language: {lang}")
+        # --- Detect language ---
+        try:
+            lang = detect(text)
+        except:
+            lang = "unknown"
 
-        # Clean English only
-        cleaned = clean_text(text)
+        # --- Encode using multilingual model ---
+        emb = encoder.encode([text], convert_to_numpy=True)
+        pred = clf.predict(emb)[0]
+        proba = clf.predict_proba(emb)[0]
 
-        # ======================================
-        # 🇮🇳 HINDI MODEL
-        # ======================================
-        if lang == "hi":
-            emb = hi_encoder.encode([text])
-            pred = hi_clf.predict(emb)[0]
-            proba = hi_clf.predict_proba(emb)[0]
+        confidence = proba[pred] * 100
+        confidence_str = f"{confidence:.2f}%"
+        result = "REAL NEWS" if pred == 1 else "FAKE NEWS"
 
-            confidence = proba[pred] * 100  # convert to %
-            confidence_str = f"{confidence:.2f}%"
+        # === 🔥 Print beautiful logs in Render ===
+        print("\n" + "="*60)
+        print("📰 NEW PREDICTION REQUEST")
+        print("="*60)
+        print(f"📥 Input Text: {text}")
+        print(f"🌍 Detected Language: {lang}")
+        print(f"🤖 Used Model: Multilingual MiniLM")
+        print(f"🎯 Prediction: {result}")
+        print(f"📊 Confidence Score: {confidence_str}")
+        print(f"🕒 Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print("="*60 + "\n")
 
-            result = "REAL NEWS" if pred == 1 else "FAKE NEWS"
-
-            print(f"🧠 [Hindi Model] => {result} | Confidence={confidence_str}")
-
-            return jsonify({
-                "success": True,
-                "prediction": result,
-                "language": "hindi",
-                "used_model": "hindi",
-                "confidence": confidence_str
-            }), 200
-
-        # ======================================
-        # 🇬🇧 ENGLISH MODEL
-        # ======================================
-        else:
-            emb = en_encoder.encode([cleaned])
-            pred = en_clf.predict(emb)[0]
-            proba = en_clf.predict_proba(emb)[0]
-
-            confidence = proba[pred] * 100  # convert to %
-            confidence_str = f"{confidence:.2f}%"
-
-            result = "REAL NEWS" if pred == 1 else "FAKE NEWS"
-
-            print(f"🧠 [English Model] => {result} | Confidence={confidence_str}")
-
-            return jsonify({
-                "success": True,
-                "prediction": result,
-                "language": "english",
-                "used_model": "english",
-                "confidence": confidence_str
-            }), 200
+        return jsonify({
+            "success": True,
+            "prediction": result,
+            "confidence": confidence_str,
+            "language": lang,
+            "used_model": "multilingual-minilm"
+        })
 
     except Exception as e:
-        print(f"❌ Prediction error: {str(e)}")
+        print("❌ Prediction error:", e)
         return jsonify({"success": False, "message": str(e)}), 500
 
-
+    
 # ========== OTP GENERATION & EMAIL SENDING ==========
 @app.route('/api/send-otp', methods=['POST'])
 def send_otp():
