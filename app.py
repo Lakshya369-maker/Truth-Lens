@@ -37,7 +37,7 @@ MODELS_DIR = BASE_DIR / "models"                   # -> E:/Minor Project/models
 print("📁 Loading models from:", MODELS_DIR)
 
 print("🌍 Loading multilingual encoder...")
-encoder = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+encoder = SentenceTransformer(str(MODELS_DIR / "multilingual_encoder"))
 
 print("🧠 Loading multilingual classifier...")
 clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
