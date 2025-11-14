@@ -11,6 +11,7 @@ from sentence_transformers import SentenceTransformer
 import random
 import time
 from langdetect import detect
+import torch
 
 # temporary in-memory stores (for dev only)
 pending_users = {}   # email -> {username, email, password}
@@ -37,15 +38,24 @@ MODELS_DIR = BASE_DIR / "models"                   # -> E:/Minor Project/models
 print("📁 Loading models from:", MODELS_DIR)
 
 print("🌍 Loading multilingual encoder...")
-encoder = SentenceTransformer(str(MODELS_DIR / "multilingual_encoder"))
 
 print("🧠 Loading multilingual classifier...")
-clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
 
 print("✅ Multilingual model loaded successfully!")
 
 
 print("✅ All Models Loaded Successfully!")
+
+def load_models():
+    global encoder, clf
+    if encoder is None or clf is None:
+        print("⚡ Loading multilingual models (lazy load)...")
+        encoder = SentenceTransformer(str(MODELS_DIR / "multilingual_encoder"))
+        clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
+        print("⚡ Models loaded successfully!")
+
+encoder = None
+clf = None
 
 # ============ ROUTES ============
 
@@ -196,9 +206,13 @@ def get_news():
 # === Transformer-based Fake News Prediction ===
 @app.route('/api/predict', methods=['POST'])
 def predict_news():
+    torch.set_num_threads(1)
     try:
         data = request.get_json(force=True)
         text = data.get("text", "").strip()
+
+        # Lazy load models
+        load_models()
 
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
