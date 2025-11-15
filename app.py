@@ -5,7 +5,6 @@ from database import create_table
 import os
 import requests
 import re
-import joblib
 from pathlib import Path
 import random
 import time
@@ -13,8 +12,6 @@ from langdetect import detect
 import onnxruntime as ort
 from transformers import AutoTokenizer
 
-
-clf = None
 
 # temporary in-memory stores (for dev only)
 pending_users = {}   # email -> {username, email, password}
@@ -202,7 +199,8 @@ def get_news():
     response = requests.get(url)
     return jsonify(response.json())
 
-# === Transformer-based Fake News Prediction ===
+clf_session = None  # <--- KEEP THIS ABOVE THE ROUTE
+
 @app.route('/api/predict', methods=['POST'])
 def predict_news():
     try:
@@ -211,14 +209,17 @@ def predict_news():
 
         load_onnx_encoder()
 
-        global clf
-        if clf is None:
-            clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
+        # Load classifier once
+        global clf_session
+        if clf_session is None:
+            print("⚡ Loading ONNX classifier...")
+            clf_session = ort.InferenceSession(str(MODELS_DIR / "clf.onnx"))
+            print("⚡ ONNX classifier loaded!")
 
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
 
-        # Detect language
+        # Language detection
         try:
             lang = detect(text)
         except:
@@ -229,7 +230,7 @@ def predict_news():
         input_ids = encoded["input_ids"].astype("int64")
         attention_mask = encoded["attention_mask"].astype("int64")
 
-        # ONNX inference
+        # Encoder ONNX inference
         outputs = ort_session.run(
             None,
             {
@@ -238,14 +239,15 @@ def predict_news():
             }
         )
 
-        last_hidden = outputs[0]   # (1, seq, hidden)
+        last_hidden = outputs[0]  # (1, seq, hidden)
         emb = mean_pool(last_hidden, attention_mask)
+        emb = emb.reshape(1, -1).astype("float32")
 
-        # FIX: reshape for sklearn
-        emb = emb.reshape(1, -1)
+        # Classifier ONNX inference
+        c_outputs = clf_session.run(None, {"input": emb})
 
-        pred = clf.predict(emb)[0]
-        proba = clf.predict_proba(emb)[0]
+        pred = int(c_outputs[0][0])
+        proba = c_outputs[1][0]
 
         confidence = proba[pred] * 100
         confidence_str = f"{confidence:.2f}%"
@@ -256,7 +258,7 @@ def predict_news():
         print("="*60)
         print(f"📥 Input Text: {text}")
         print(f"🌍 Detected Language: {lang}")
-        print(f"🤖 Used Model: ONNX MiniLM")
+        print(f"🤖 Used Model: ONNX MiniLM + ONNX Classifier")
         print(f"🎯 Prediction: {result}")
         print(f"📊 Confidence Score: {confidence_str}")
         print(f"🕒 Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -273,6 +275,7 @@ def predict_news():
     except Exception as e:
         print("❌ Prediction error:", e)
         return jsonify({"success": False, "message": str(e)}), 500
+
 
     
 # ========== OTP GENERATION & EMAIL SENDING ==========
