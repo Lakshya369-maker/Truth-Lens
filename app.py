@@ -7,11 +7,14 @@ import requests
 import re
 import joblib
 from pathlib import Path
-from sentence_transformers import SentenceTransformer
 import random
 import time
 from langdetect import detect
-import torch
+import onnxruntime as ort
+from transformers import AutoTokenizer
+
+
+clf = None
 
 # temporary in-memory stores (for dev only)
 pending_users = {}   # email -> {username, email, password}
@@ -35,27 +38,23 @@ print("✅ Database initialized")
 BASE_DIR = Path(__file__).resolve().parent         # -> E:/Minor Project
 MODELS_DIR = BASE_DIR / "models"                   # -> E:/Minor Project/models
 
-print("📁 Loading models from:", MODELS_DIR)
 
-print("🌍 Loading multilingual encoder...")
+tokenizer = None
+ort_session = None
 
-print("🧠 Loading multilingual classifier...")
+def load_onnx_encoder():
+    global tokenizer, ort_session
+    if tokenizer is None:
+        print("⚡ Loading ONNX tokenizer & encoder...")
+        tokenizer = AutoTokenizer.from_pretrained(str(MODELS_DIR / "multilingual_encoder"))
+        ort_session = ort.InferenceSession(str(MODELS_DIR / "encoder.onnx"))
+        print("⚡ ONNX encoder loaded!")
 
-print("✅ Multilingual model loaded successfully!")
+def mean_pool(last_hidden_state, attention_mask):
+    mask = attention_mask[..., None]  # expand the last dim
+    masked = last_hidden_state * mask
+    return masked.sum(axis=1) / mask.sum(axis=1)
 
-
-print("✅ All Models Loaded Successfully!")
-
-def load_models():
-    global encoder, clf
-    if encoder is None or clf is None:
-        print("⚡ Loading multilingual models (lazy load)...")
-        encoder = SentenceTransformer(str(MODELS_DIR / "multilingual_encoder"))
-        clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
-        print("⚡ Models loaded successfully!")
-
-encoder = None
-clf = None
 
 # ============ ROUTES ============
 
@@ -206,25 +205,45 @@ def get_news():
 # === Transformer-based Fake News Prediction ===
 @app.route('/api/predict', methods=['POST'])
 def predict_news():
-    torch.set_num_threads(1)
     try:
         data = request.get_json(force=True)
         text = data.get("text", "").strip()
 
-        # Lazy load models
-        load_models()
+        load_onnx_encoder()
+
+        global clf
+        if clf is None:
+            clf = joblib.load(str(MODELS_DIR / "multilingual_semantic_clf.joblib"))
 
         if not text:
             return jsonify({"success": False, "message": "No text provided"}), 400
 
-        # --- Detect language ---
+        # Detect language
         try:
             lang = detect(text)
         except:
             lang = "unknown"
 
-        # --- Encode using multilingual model ---
-        emb = encoder.encode([text], convert_to_numpy=True)
+        # Tokenize
+        encoded = tokenizer(text, return_tensors="np")
+        input_ids = encoded["input_ids"].astype("int64")
+        attention_mask = encoded["attention_mask"].astype("int64")
+
+        # ONNX inference
+        outputs = ort_session.run(
+            None,
+            {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask
+            }
+        )
+
+        last_hidden = outputs[0]   # (1, seq, hidden)
+        emb = mean_pool(last_hidden, attention_mask)
+
+        # FIX: reshape for sklearn
+        emb = emb.reshape(1, -1)
+
         pred = clf.predict(emb)[0]
         proba = clf.predict_proba(emb)[0]
 
@@ -232,13 +251,12 @@ def predict_news():
         confidence_str = f"{confidence:.2f}%"
         result = "REAL NEWS" if pred == 1 else "FAKE NEWS"
 
-        # === 🔥 Print beautiful logs in Render ===
         print("\n" + "="*60)
         print("📰 NEW PREDICTION REQUEST")
         print("="*60)
         print(f"📥 Input Text: {text}")
         print(f"🌍 Detected Language: {lang}")
-        print(f"🤖 Used Model: Multilingual MiniLM")
+        print(f"🤖 Used Model: ONNX MiniLM")
         print(f"🎯 Prediction: {result}")
         print(f"📊 Confidence Score: {confidence_str}")
         print(f"🕒 Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -249,7 +267,7 @@ def predict_news():
             "prediction": result,
             "confidence": confidence_str,
             "language": lang,
-            "used_model": "multilingual-minilm"
+            "used_model": "onnx-minilm"
         })
 
     except Exception as e:
